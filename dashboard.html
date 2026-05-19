@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>LIBERTY Dental Plan - Dashboard</title>
+
+  <link rel="stylesheet" href="./bootstrap-overrides.css">
+  <link rel="stylesheet" href="./styles.css">
+  <link rel="stylesheet" href="./all.min.css">
+
+  <script src="https://alcdn.msauth.net/browser/2.38.1/js/msal-browser.min.js"></script>
+
+  <style>
+    :root{
+      --brand-blue:#3352a3;
+      --brand-dark:#111b36;
+      --panel:#ffffff;
+      --surface:#f7f7f7;
+      --surface-soft:#e9eaee;
+      --curve:#dcecf7;
+      --footer:#2e3039;
+      --text:#222;
+      --muted:#667085;
+      --border:#d8dde6;
+    }
+
+    *{box-sizing:border-box}
+
+    body{
+      margin:0;
+      font-family:Roboto, Arial, sans-serif;
+      background:var(--surface);
+      color:var(--text);
+      overflow-x:hidden;
+    }
+
+    a{text-decoration:none}
+
+    .topbar{
+      height:45px;
+      background:var(--brand-blue);
+      color:#fff;
+      display:flex;
+      justify-content:flex-end;
+      align-items:center;
+      padding:0 18px;
+      gap:12px;
+      font-size:16px;
+    }
+
+    .topbar .icon-box{
+      width:22px;
+      height:22px;
+      border:1px solid rgba(255,255,255,.6);
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      font-weight:bold;
+      line-height:1;
+      border-radius:2px;
+    }
+
+    .page{
+      position:relative;
+      min-height:calc(100vh - 45px);
+      overflow:hidden;
+      background:var(--surface);
+    }
+
+    .curve-left,
+    .curve-right{
+      position:absolute;
+      border:22px solid var(--curve);
+      border-radius:50%;
+      pointer-events:none;
+      opacity:.95;
+    }
+
+    .curve-left{
+      width:760px;
+      height:760px;
+      left:-470px;
+      bottom:-250px;
+    }
+
+    .curve-right{
+      width:980px;
+      height:980px;
+      right:-430px;
+      bottom:-420px;
+    }
+
+    .diag-left,
+    .diag-right{
+      position:absolute;
+      width:20px;
+      height:92px;
+      background:var(--curve);
+      transform:skew(-25deg);
+      top:62px;
+      pointer-events:none;
+    }
+
+    .diag-left{left:6px}
+    .diag-right{right:398px}
+
+    .header{
+      display:grid;
+      grid-template-columns:1fr auto 1fr;
+      align-items:center;
+      padding:12px 95px 8px;
+      position:relative;
+      z-index:2;
+      background:#fff;
+      border-bottom:1px solid #eef1f5;
+    }
+
+    .logo img{
+      height:42px;
+      width:auto;
+      display:block;
+    }
+
+    .emergency-btn{
+      background:#fff;
+      border:1px solid #81a0f1;
+      color:#494949;
+      border-radius:8px;
+      padding:10px 14px;
+      font-weight:600;
+      font-size:14px;
+      box-shadow:0 1px 2px rgba(16,24,40,.05);
+      cursor:pointer;
+      white-space:nowrap;
+    }
+
+    .dashboard-wrap{
+      position:relative;
+      z-index:2;
+      max-width:1180px;
+      margin:34px auto 48px;
+      padding:0 40px;
+    }
+
+    .hero-card{
+      background:linear-gradient(135deg, #3352a3 0%, #4568c0 100%);
+      color:#fff;
+      border-radius:18px;
+      padding:28px 32px;
+      box-shadow:0 12px 30px rgba(51,82,163,.18);
+      margin-bottom:24px;
+    }
+
+    .hero-card h1{
+      margin:0 0 8px;
+      font-size:34px;
+      line-height:1.15;
+      font-weight:700;
+    }
+
+    .hero-card p{
+      margin:0;
+      font-size:17px;
+      line-height:1.6;
+      max-width:820px;
+    }
+
+    .hero-user{
+      margin-top:16px;
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      background:rgba(255,255,255,.14);
+      border:1px solid rgba(255,255,255,.25);
+      border-radius:999px;
+      padding:10px 16px;
+      font-size:15px;
+      font-weight:500;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns:2fr 1fr;
+      gap:24px;
+    }
+
+    .panel{
+      background:var(--panel);
+      border:1px solid var(--border);
+      border-radius:16px;
+      box-shadow:0 6px 18px rgba(16,24,40,.06);
+    }
+
+    .panel-header{
+      padding:20px 22px 0;
+    }
+
+    .panel-header h2{
+      margin:0;
+      font-size:22px;
+      color:#101828;
+      font-weight:700;
+    }
+
+    .panel-header p{
+      margin:8px 0 0;
+      color:var(--muted);
+      font-size:15px;
+      line-height:1.5;
+    }
+
+    .panel-body{
+      padding:20px 22px 22px;
+    }
+
+    .tiles{
+      display:grid;
+      grid-template-columns:repeat(2, minmax(0, 1fr));
+      gap:16px;
+    }
+
+    .tile{
+      border:1px solid #e4e7ec;
+      border-radius:14px;
+      padding:18px;
+      background:#fff;
+      min-height:150px;
+    }
+
+    .tile .icon{
+      width:44px;
+      height:44px;
+      border-radius:12px;
+      background:#edf2ff;
+      color:var(--brand-blue);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:18px;
+      margin-bottom:14px;
+    }
+
+    .tile h3{
+      margin:0 0 8px;
+      font-size:18px;
+      color:#101828;
+      font-weight:700;
+    }
+
+    .tile p{
+      margin:0 0 14px;
+      color:#667085;
+      font-size:14px;
+      line-height:1.55;
+    }
+
+    .tile a{
+      color:var(--brand-blue);
+      font-weight:600;
+      font-size:14px;
+    }
+
+    .side-stack{
+      display:grid;
+      gap:24px;
+    }
+
+    .member-card{
+      padding:22px;
+    }
+
+    .avatar{
+      width:58px;
+      height:58px;
+      border-radius:50%;
+      background:#edf2ff;
+      color:var(--brand-blue);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:22px;
+      font-weight:700;
+      margin-bottom:14px;
+    }
+
+    .member-card h3{
+      margin:0 0 6px;
+      font-size:20px;
+      color:#101828;
+    }
+
+    .member-card .sub{
+      color:#667085;
+      font-size:14px;
+      margin-bottom:16px;
+      word-break:break-word;
+    }
+
+    .meta{
+      display:grid;
+      gap:10px;
+      margin-bottom:18px;
+    }
+
+    .meta-item{
+      background:#f8fafc;
+      border:1px solid #eaecf0;
+      border-radius:12px;
+      padding:12px 14px;
+    }
+
+    .meta-label{
+      display:block;
+      font-size:12px;
+      color:#667085;
+      margin-bottom:4px;
+    }
+
+    .meta-value{
+      font-size:14px;
+      font-weight:600;
+      color:#101828;
+      word-break:break-word;
+    }
+
+    .btn-row{
+      display:grid;
+      gap:12px;
+    }
+
+    .btn-primary-custom,
+    .btn-outline-custom{
+      width:100%;
+      border-radius:10px;
+      padding:12px 16px;
+      font-size:14px;
+      font-weight:600;
+      cursor:pointer;
+    }
+
+    .btn-primary-custom{
+      border:1px solid var(--brand-blue);
+      background:var(--brand-blue);
+      color:#fff;
+    }
+
+    .btn-outline-custom{
+      border:1px solid var(--brand-blue);
+      background:#fff;
+      color:var(--brand-blue);
+    }
+
+    .quick-list{
+      list-style:none;
+      margin:0;
+      padding:0;
+    }
+
+    .quick-list li + li{
+      margin-top:12px;
+    }
+
+    .quick-list a{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:14px 16px;
+      border:1px solid #eaecf0;
+      border-radius:12px;
+      color:#101828;
+      background:#fff;
+    }
+
+    .quick-list a span:last-child{
+      color:var(--brand-blue);
+    }
+
+    .footer-panel{
+      background:#2e3039;
+      color:#fff;
+      padding-top:32px;
+      padding-left:32px;
+      padding-right:32px;
+      position:relative;
+      z-index:2;
+    }
+
+    .footer-panel .container{
+      margin-bottom:15px;
+      max-width:1180px;
+      margin-left:auto;
+      margin-right:auto;
+    }
+
+    .footer-panel .logo{
+      width:80px;
+      height:auto;
+    }
+
+    .footer-panel h5{
+      font-family:"Century Gothic", Arial, sans-serif;
+      font-size:12px;
+      font-weight:700;
+      line-height:14.4px;
+      text-align:left;
+      text-transform:uppercase;
+      margin-bottom:10px;
+      color:#fff;
+    }
+
+    .footer-panel ul{
+      list-style:none;
+      padding-left:0;
+      margin:0;
+    }
+
+    .footer-panel li{
+      font-family:"Century Gothic", Arial, sans-serif;
+      font-size:12px;
+      font-weight:400;
+      text-align:left;
+      padding-bottom:3px;
+    }
+
+    .footer-panel a{
+      color:#fff;
+      text-decoration:none;
+    }
+
+    .footer-panel a:hover{
+      text-decoration:underline;
+    }
+
+    .footer-black{
+      border-top:1px solid rgba(255,255,255,.12);
+      padding:14px 0 18px;
+      margin-top:10px;
+      color:#fff;
+      font-size:12px;
+    }
+
+    #status{
+      margin-top:10px;
+      font-size:13px;
+      color:#b42318;
+      min-height:18px;
+    }
+
+    @media (max-width: 1100px){
+      .grid{
+        grid-template-columns:1fr;
+      }
+    }
+
+    @media (max-width: 768px){
+      .header{
+        grid-template-columns:1fr;
+        gap:14px;
+        padding:16px 20px 8px;
+        justify-items:center;
+      }
+
+      .dashboard-wrap{
+        padding:0 20px;
+      }
+
+      .hero-card{
+        padding:24px 20px;
+      }
+
+      .hero-card h1{
+        font-size:28px;
+      }
+
+      .tiles{
+        grid-template-columns:1fr;
+      }
+
+      .topbar{
+        font-size:14px;
+        gap:8px;
+      }
+
+      .footer-panel{
+        padding-left:16px;
+        padding-right:16px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <span>Text Size</span>
+    <span class="icon-box">−</span>
+    <span class="icon-box">↻</span>
+    <span class="icon-box">+</span>
+    <span>🌐 English</span>
+  </div>
+
+  <div class="page">
+    <div class="curve-left"></div>
+    <div class="curve-right"></div>
+    <div class="diag-left"></div>
+    <div class="diag-right"></div>
+
+    <header class="header">
+      <div class="logo">
+        <img src="./footer-logo.jpg" alt="LIBERTY Dental Plan">
+      </div>
+      <button class="emergency-btn" type="button">I have a Dental Emergency</button>
+      <div></div>
+    </header>
+
+    <main class="dashboard-wrap">
+      <section class="hero-card">
+        <h1>Welcome to My Compass Dashboard</h1>
+        <p>
+          Access your member tools, plan information, ID card resources, and account actions from one place.
+        </p>
+        <div class="hero-user">
+          <i class="fa-solid fa-user"></i>
+          <span id="welcomeUser">Loading member details...</span>
+        </div>
+      </section>
+
+      <section class="grid">
+        <div class="panel">
+          <div class="panel-header">
+            <h2>Member Services</h2>
+            <p>Use the same portal experience to find dentists, review benefits, and manage your account details.</p>
+          </div>
+          <div class="panel-body">
+            <div class="tiles">
+              <div class="tile">
+                <div class="icon"><i class="fa-solid fa-magnifying-glass"></i></div>
+                <h3>Find a Dentist</h3>
+                <p>Search participating providers and locate in-network dentists near your area.</p>
+                <a href="#" onclick="return false;">Open search</a>
+              </div>
+
+              <div class="tile">
+                <div class="icon"><i class="fa-regular fa-id-card"></i></div>
+                <h3>Member ID Card</h3>
+                <p>View or download your member ID card when you need a quick copy.</p>
+                <a href="#" onclick="return false;">View card</a>
+              </div>
+
+              <div class="tile">
+                <div class="icon"><i class="fa-solid fa-file-lines"></i></div>
+                <h3>Benefits & Coverage</h3>
+                <p>Review plan details, eligibility information, and benefit summaries.</p>
+                <a href="#" onclick="return false;">Review benefits</a>
+              </div>
+
+              <div class="tile">
+                <div class="icon"><i class="fa-solid fa-phone"></i></div>
+                <h3>Support & Contact</h3>
+                <p>Reach support resources and key contact options for member assistance.</p>
+                <a href="#" onclick="return false;">Contact support</a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div id="memberInfo"></div>
+        <div class="side-stack">
+          <div class="panel member-card">
+            <div class="avatar" id="avatarInitials">M</div>
+            <h3 id="memberName">Member</h3>
+            <div class="sub" id="memberEmail">Signed in account details will appear here.</div>
+
+            <div class="meta">
+              <div class="meta-item">
+                <span class="meta-label">Signed in as</span>
+                <span class="meta-value" id="accountUsername">--</span>
+              </div>
+              <div class="meta-item">
+                <span class="meta-label">Portal status</span>
+                <span class="meta-value">Authenticated</span>
+              </div>
+            </div>
+
+            <div class="btn-row">
+              <button class="btn-primary-custom" type="button" onclick="window.location.href='./'">Back to Home</button>
+              <button id="signOutBtn" class="btn btn-outline-light btn-sm">Sign out</button>
+            </div>
+
+            <div id="status"></div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-header">
+              <h2>Quick Links</h2>
+            </div>
+            <div class="panel-body">
+              <ul class="quick-list">
+                <li><a href="#" onclick="return false;"><span>Profile settings</span><span><i class="fa-solid fa-angle-right"></i></span></a></li>
+                <li><a href="#" onclick="return false;"><span>Claims and plan activity</span><span><i class="fa-solid fa-angle-right"></i></span></a></li>
+                <li><a href="#" onclick="return false;"><span>Download forms</span><span><i class="fa-solid fa-angle-right"></i></span></a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer-panel">
+      <div class="container">
+        <div class="row">
+          <div class="col-12 col-md-2 mb-3 d-flex justify-content-center align-items-start">
+            <a href="https://www.libertydentalplan.com" target="_blank" rel="noreferrer">
+              <img src="./footer-logo.jpg" alt="Logo" class="logo img-fluid">
+            </a>
+          </div>
+
+          <div class="col-12 col-md-2 mb-3">
+            <h5>Explore</h5>
+            <ul class="list-unstyled">
+              <li><a href="https://www.libertydentalplan.com/Members/Welcome-to-Member-Services.aspx" target="_blank" rel="noreferrer">Members</a></li>
+              <li><a href="https://www.libertydentalplan.com/Providers/Providers-1.aspx" target="_blank" rel="noreferrer">Providers</a></li>
+              <li><a href="https://www.libertydentalplan.com/Agents-Brokers-1/Welcome-1-1.aspx" target="_blank" rel="noreferrer">Brokers</a></li>
+            </ul>
+          </div>
+
+          <div class="col-12 col-md-2 mb-3">
+            <h5>Programs</h5>
+            <ul class="list-unstyled">
+              <li><a href="https://www.libertydentalplan.com/Programs/Medicaid.aspx" target="_blank" rel="noreferrer">Medicaid</a></li>
+              <li><a href="https://www.libertydentalplan.com/LIBERTY-Dental-Plan-of-California/Medi-Cal/Medi-Cal-LA-PHP-.aspx" target="_blank" rel="noreferrer">Medi-Cal</a></li>
+            </ul>
+          </div>
+
+          <div class="col-12 col-md-2 mb-3">
+            <h5>Connect</h5>
+            <ul class="list-unstyled">
+              <li><a href="https://www.libertydentalplan.com/Contact-Us.aspx" target="_blank" rel="noreferrer">Contact Us</a></li>
+              <li><a href="https://www.libertydentalplan.com/About-Liberty-Dental-Plan.aspx" target="_blank" rel="noreferrer">About Us</a></li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="footer-black">
+          <div class="row">
+            <div class="col-12 col-md-3 d-flex justify-content-center justify-content-md-start align-items-center">
+              <span>© <span id="currentYear"></span> LIBERTY Dental Plan</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </footer>
+  </div>
+<script src="https://alcdn.msauth.net/browser/2.38.0/js/msal-browser.min.js"></script>
+<script>
+  const msalConfig = {
+    auth: {
+      clientId: "d1141f25-2729-4ea5-9892-f80db4205ebf",
+      authority: "https://birlasoftdentalentra.ciamlogin.com/36090fda-8a83-4040-8c58-7cf784511505",
+      redirectUri: "https://anilkishore1978.github.io/ACPL-test/"
+    },
+    cache: {
+      cacheLocation: "sessionStorage",
+      storeAuthStateInCookie: false
+    }
+  };
+
+  const msalInstance = new msal.PublicClientApplication(msalConfig);
+
+  function renderUser(account) {
+    const el = document.getElementById("memberInfo");
+    if (!el) return;
+
+    if (!account) {
+      el.innerHTML = "<div class='text-warning'>Session not available. Please access app from Entra portal.</div>";
+      return;
+    }
+
+    el.innerHTML = `
+      <div class="fw-semibold">${account.name || "Signed in user"}</div>
+      <div class="text-muted">${account.username || ""}</div>
+    `;
+  }
+
+  async function initDashboard() {
+    try {
+      await msalInstance.handleRedirectPromise();
+      const accounts = msalInstance.getAllAccounts();
+
+      if (accounts.length > 0) {
+        msalInstance.setActiveAccount(accounts[0]);
+        renderUser(accounts[0]);
+      } else {
+        renderUser(null);
+      }
+    } catch (e) {
+      console.error(e);
+      renderUser(null);
+    }
+  }
+ document.getElementById("signOutBtn").addEventListener("click", async () => {
+    const account = msalInstance.getActiveAccount() || msalInstance.getAllAccounts()[0] || undefined;
+
+    await msalInstance.logoutRedirect({
+      account,
+      postLogoutRedirectUri: "https://anilkishore1978.github.io/ACPL-test/"
+    });
+  });
+  initDashboard();
+</script>
+
+</body>
+</html>
