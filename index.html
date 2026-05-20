@@ -4,321 +4,989 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>LIBERTY Dental Plan – Member Portal</title>
-<script src="https://cdn.jsdelivr.net/npm/@azure/msal-browser@3.27.0/lib/msal-browser.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/react@18/umd/react.production.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.production.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@babel/standalone@7/babel.min.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html,body,#root{height:100%;font-family:'Roboto',sans-serif;background:#f0f2f8;font-size:16px}
-body{overflow-x:hidden}
+html{font-size:16px}
+body{font-family:'Roboto',sans-serif;background:#edf1f8;min-height:100vh}
+#root{display:flex;flex-direction:column;min-height:100vh}
 
-/* ══ TOP BAR ══ */
-.top-bar{background:#3352a3;color:#fff;padding:5px 0;font-size:13px}
-.tb-inner{max-width:1280px;margin:0 auto;padding:0 20px;display:flex;align-items:center;justify-content:flex-end;gap:16px}
-.tb-sep{opacity:.3;font-size:18px}
-.tb-fontlabel{opacity:.85}
-.tb-btn{background:none;border:1px solid rgba(255,255,255,.3);color:#fff;cursor:pointer;border-radius:3px;width:24px;height:22px;font-size:13px;transition:background .15s;display:inline-flex;align-items:center;justify-content:center}
-.tb-btn:hover{background:rgba(255,255,255,.15)}
-.lang-wrap{display:flex;align-items:center;gap:6px;cursor:pointer;opacity:.9;transition:opacity .15s}
-.lang-wrap:hover{opacity:1}
-.lang-icon{width:16px;height:16px;vertical-align:middle}
+/* TOP BAR */
+.topbar{background:#3352a3;color:#fff;padding:5px 0}
+.tb-in{max-width:1280px;margin:0 auto;padding:0 20px;display:flex;align-items:center;justify-content:flex-end;gap:12px;font-size:13px}
+.tb-btn{background:none;border:1px solid rgba(255,255,255,.3);color:#fff;cursor:pointer;border-radius:3px;width:24px;height:22px;display:inline-flex;align-items:center;justify-content:center;font-size:12px}
+.tb-btn:hover{background:rgba(255,255,255,.18)}
 
-/* ══ HEADER ══ */
-.site-header{background:#fff;box-shadow:0 1px 6px rgba(0,0,0,.09);position:sticky;top:0;z-index:100}
-.nav-inner{max-width:1280px;margin:0 auto;padding:10px 20px;display:flex;align-items:center;justify-content:space-between}
+/* HEADER */
+.site-header{background:#fff;box-shadow:0 1px 6px rgba(0,0,0,.09);position:sticky;top:0;z-index:200}
+.nav-in{max-width:1280px;margin:0 auto;padding:10px 20px;display:flex;align-items:center;justify-content:space-between}
 .logo-img{height:48px;display:block}
-.nav-right{display:flex;align-items:center;gap:12px}
-.btn-emergency{background:none;border:2px solid #3352a3;color:#3352a3;border-radius:4px;padding:7px 16px;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;letter-spacing:.3px}
-.btn-emergency:hover{background:#3352a3;color:#fff}
-.btn-signout{background:none;border:1px solid #dc3545;color:#dc3545;border-radius:4px;padding:6px 14px;font-size:13px;cursor:pointer;font-weight:600;transition:all .2s}
-.btn-signout:hover{background:#dc3545;color:#fff}
-.btn-signout i{margin-right:5px}
+.nav-right{display:flex;align-items:center;gap:8px}
+.btn-emg{background:none;border:2px solid #3352a3;color:#3352a3;border-radius:4px;padding:7px 14px;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s}
+.btn-emg:hover{background:#3352a3;color:#fff}
+.btn-out{background:none;border:1px solid #dc3545;color:#dc3545;border-radius:4px;padding:6px 12px;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s}
+.btn-out:hover{background:#dc3545;color:#fff}
 
-/* ══ MAIN LAYOUT ══ */
-.page-main{flex:1}
-.hero-layout{max-width:1280px;margin:0 auto;padding:48px 20px 60px;display:grid;grid-template-columns:1fr 420px;gap:64px;align-items:start}
-@media(max-width:960px){.hero-layout{grid-template-columns:1fr;gap:28px}}
+/* CORS WARNING */
+.cors-bar{background:#7c3aed;color:#fff;padding:8px 20px;font-size:12px;text-align:center;display:flex;align-items:center;justify-content:center;gap:8px}
+.cors-bar code{background:rgba(255,255,255,.2);padding:1px 6px;border-radius:3px;font-size:11px}
 
-/* ══ ALERT BANNERS ══ */
-.alert-info{background:#e8edf8;border-left:4px solid #3352a3;border-radius:4px;padding:11px 40px 11px 14px;font-size:14px;display:flex;align-items:flex-start;gap:10px;position:relative;margin-bottom:12px;line-height:1.5}
-.alert-info img{flex-shrink:0;width:18px;height:18px;margin-top:2px}
-.alert-warning{background:#fff8e1;border-left:4px solid #f59e0b;border-radius:4px;padding:11px 40px 11px 14px;font-size:14px;display:flex;align-items:flex-start;gap:10px;position:relative;margin-bottom:12px;line-height:1.5}
-.alert-warning i{color:#f59e0b;font-size:16px;flex-shrink:0;margin-top:2px}
-.alert-close{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#888;font-size:18px;line-height:1}
-.alert-close:hover{color:#333}
+/* ALERTS */
+.al{border-radius:4px;padding:10px 38px 10px 13px;font-size:14px;display:flex;align-items:flex-start;gap:9px;position:relative;margin-bottom:10px;line-height:1.5}
+.al-info{background:#e8edf8;border-left:4px solid #3352a3}
+.al-warn{background:#fffbeb;border-left:4px solid #f59e0b}
+.al-x{position:absolute;right:9px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:17px;color:#888;line-height:1;padding:0}
+.al-x:hover{color:#333}
 
-/* ══ HERO TEXT ══ */
-.hero-title{font-family:'Nunito',sans-serif;font-size:clamp(34px,4.5vw,52px);font-weight:900;color:#1a2340;line-height:1.12;margin-bottom:18px}
-.hero-title .accent{color:#602D86}
-.hero-subtitle{font-size:16px;color:#4a5568;line-height:1.85;max-width:480px;margin-bottom:28px}
-.hero-features{display:flex;flex-direction:column;gap:14px}
-.hf-item{display:flex;align-items:center;gap:14px}
-.hf-icon{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#e8edf8,#d0d9f2);display:flex;align-items:center;justify-content:center;color:#3352a3;font-size:17px;flex-shrink:0}
-.hf-text h4{font-size:14px;font-weight:700;color:#1a2340;margin-bottom:2px}
-.hf-text p{font-size:13px;color:#6b7280}
+/* HERO */
+.hero-layout{max-width:1280px;margin:0 auto;padding:44px 20px 60px;display:grid;grid-template-columns:1fr 440px;gap:56px;align-items:start}
+@media(max-width:960px){.hero-layout{grid-template-columns:1fr;gap:24px}}
+.hero-title{font-family:'Nunito',sans-serif;font-size:clamp(32px,4vw,50px);font-weight:900;color:#1a2340;line-height:1.12;margin-bottom:14px}
+.hero-acc{color:#602D86}
+.hero-sub{font-size:15px;color:#4a5568;line-height:1.85;max-width:480px;margin-bottom:24px}
+.hero-feats{display:flex;flex-direction:column;gap:13px}
+.hf{display:flex;align-items:center;gap:13px}
+.hf-ic{width:38px;height:38px;border-radius:50%;background:#eaedfa;display:flex;align-items:center;justify-content:center;color:#3352a3;font-size:17px;flex-shrink:0}
+.hf-t{font-size:14px;font-weight:700;color:#1a2340;margin-bottom:2px}
+.hf-d{font-size:12px;color:#7280a0}
 
-/* ══ LOGIN CARD ══ */
-.lc-wrap{display:flex;flex-direction:column;gap:12px}
-.login-card{background:#fff;border-radius:8px;box-shadow:0 2px 24px rgba(51,82,163,.12);overflow:hidden}
-.lc-header{background:#3352a3;color:#fff;padding:15px 24px;text-align:center;font-size:17px;font-weight:700;letter-spacing:.4px;display:flex;align-items:center;justify-content:center;gap:8px}
-.lc-body{padding:24px 26px 22px}
+/* AUTH CARD */
+.acard{background:#fff;border-radius:10px;box-shadow:0 4px 28px rgba(51,82,163,.12);overflow:hidden}
+.acard-head{background:#3352a3;color:#fff;padding:14px 22px;text-align:center;font-size:17px;font-weight:700;letter-spacing:.3px;display:flex;align-items:center;justify-content:center;gap:8px}
+.acard-body{padding:22px 24px 20px}
 
-/* form */
-.fg{margin-bottom:15px}
-.fg label{display:block;font-size:13px;font-weight:700;color:#333;margin-bottom:6px}
-.fg input{width:100%;padding:10px 13px;border:1px solid #ccc;border-radius:4px;font-size:15px;color:#333;background:#fff;transition:border-color .15s,box-shadow .15s;font-family:'Roboto',sans-serif}
+/* STEP DOTS */
+.steps-row{display:flex;align-items:center;margin-bottom:20px}
+.step-item{display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;position:relative}
+.step-item:not(:last-child)::after{content:'';position:absolute;top:11px;left:50%;width:100%;height:1px;background:#e0e0e0;z-index:0}
+.step-item.s-done:not(:last-child)::after,.step-item.s-act:not(:last-child)::after{background:#c7d4f0}
+.step-dot{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;z-index:1}
+.s-done .step-dot{background:#3352a3;color:#fff}
+.s-act  .step-dot{background:#3352a3;color:#fff;box-shadow:0 0 0 3px rgba(51,82,163,.18)}
+.s-idle .step-dot{background:#e8e8e8;color:#aaa}
+.step-lbl{font-size:10px;font-weight:600;color:#aaa;white-space:nowrap}
+.s-done .step-lbl,.s-act .step-lbl{color:#3352a3}
+
+/* FORM FIELDS */
+.fg{margin-bottom:14px}
+.fg label{display:block;font-size:13px;font-weight:700;color:#333;margin-bottom:5px}
+.fg input[type=text],.fg input[type=email],.fg input[type=password]{width:100%;padding:10px 13px;border:1px solid #ccc;border-radius:4px;font-size:15px;color:#333;background:#fff;transition:border .15s,box-shadow .15s;font-family:inherit}
 .fg input:focus{outline:none;border-color:#3352a3;box-shadow:0 0 0 3px rgba(51,82,163,.1)}
-.fg input.err{border-color:#dc3545}
+.fg input.ferr{border-color:#dc3545}
 .pw-wrap{position:relative}
 .pw-wrap input{padding-right:40px}
-.pw-eye{position:absolute;right:11px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#888;font-size:14px;padding:2px}
-.pw-eye:hover{color:#3352a3}
+.pw-toggle{position:absolute;right:11px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#888;font-size:14px;padding:0}
+.pw-toggle:hover{color:#3352a3}
 
-.err-box{background:#fff3f3;border:1px solid #f5c6cb;border-radius:4px;color:#721c24;padding:10px 13px;font-size:13px;margin-bottom:14px;display:flex;align-items:flex-start;gap:8px;line-height:1.5}
-.err-box i{flex-shrink:0;margin-top:1px}
-.success-box{background:#d4edda;border:1px solid #c3e6cb;border-radius:4px;color:#155724;padding:13px 16px;font-size:14px;text-align:center;line-height:1.6}
-.success-box i{margin-right:6px}
+/* PASSWORD STRENGTH */
+.pw-str{margin-top:6px}
+.str-bars{display:flex;gap:4px;margin-bottom:3px}
+.str-bar{height:4px;flex:1;border-radius:2px;background:#e8e8e8;transition:background .3s}
+.str-bar.lv1{background:#ef4444}
+.str-bar.lv2{background:#f59e0b}
+.str-bar.lv3{background:#10b981}
+.str-bar.lv4{background:#059669}
+.str-lbl{font-size:11px;color:#888}
 
-/* buttons */
-.btn-primary{width:100%;background:#3352a3;color:#fff;border:none;border-radius:4px;padding:12px;font-size:15px;font-weight:700;cursor:pointer;transition:background .2s;display:flex;align-items:center;justify-content:center;gap:8px;letter-spacing:.2px;font-family:'Roboto',sans-serif}
-.btn-primary:hover:not(:disabled){background:#2a4490}
-.btn-primary:disabled{background:#81a0f1;cursor:not-allowed}
-.spinner{width:15px;height:15px;border:2px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
+/* OTP INPUT */
+.otp-wrap{display:flex;gap:8px;justify-content:center;margin:16px 0}
+.otp-box{width:42px;height:50px;border:2px solid #ddd;border-radius:6px;text-align:center;font-size:22px;font-weight:700;color:#1a2340;background:#fff;outline:none;transition:border .15s;caret-color:transparent}
+.otp-box:focus{border-color:#3352a3;box-shadow:0 0 0 3px rgba(51,82,163,.12)}
+.otp-box.filled{border-color:#3352a3;background:#f0f4ff}
+.otp-hint{text-align:center;font-size:13px;color:#555;margin-bottom:4px;line-height:1.5}
+.otp-target{font-weight:700;color:#3352a3}
+.otp-resend{text-align:center;margin-top:10px;font-size:13px;color:#888}
+
+/* BUTTONS */
+.btn-prim{width:100%;background:#3352a3;color:#fff;border:none;border-radius:4px;padding:11px;font-size:15px;font-weight:700;cursor:pointer;transition:background .2s;display:flex;align-items:center;justify-content:center;gap:8px;font-family:inherit}
+.btn-prim:hover:not(:disabled){background:#2a4490}
+.btn-prim:disabled{background:#a3b4e0;cursor:not-allowed}
+.btn-sec{width:100%;background:#fff;color:#3352a3;border:2px solid #3352a3;border-radius:4px;padding:9px;font-size:15px;font-weight:700;cursor:pointer;transition:all .2s;font-family:inherit}
+.btn-sec:hover{background:#3352a3;color:#fff}
+.btn-ghost{background:none;border:none;color:#3352a3;font-size:13px;cursor:pointer;font-weight:600;padding:0;font-family:inherit}
+.btn-ghost:hover{text-decoration:underline}
+.btn-back{background:none;border:none;color:#3352a3;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:5px;font-weight:600;margin-bottom:14px;font-family:inherit;padding:0}
+.btn-back:hover{text-decoration:underline}
+.spin{width:15px;height:15px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
 @keyframes spin{to{transform:rotate(360deg)}}
 
-.btn-ms{width:100%;background:#fff;border:1px solid #d0d0d0;border-radius:4px;padding:10px 14px;font-size:14px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;color:#333;transition:border-color .18s,box-shadow .18s;font-family:'Roboto',sans-serif;margin-bottom:12px}
-.btn-ms:hover:not(:disabled){border-color:#3352a3;box-shadow:0 0 0 2px rgba(51,82,163,.1)}
-.btn-ms:disabled{opacity:.6;cursor:not-allowed}
-.ms-icon{width:18px;height:18px;flex-shrink:0}
+/* MISC */
+.dvdr{display:flex;align-items:center;gap:10px;margin:14px 0;color:#ccc;font-size:12px}
+.dvdr::before,.dvdr::after{content:'';flex:1;height:1px;background:#eee}
+.link-row{display:flex;justify-content:space-between;margin-top:11px;font-size:13px}
+.lnk{color:#3352a3;cursor:pointer;font-weight:600}
+.lnk:hover{text-decoration:underline}
 
-.btn-outline{width:100%;background:#fff;color:#3352a3;border:2px solid #3352a3;border-radius:4px;padding:10px;font-size:15px;font-weight:700;cursor:pointer;transition:all .2s;text-align:center;font-family:'Roboto',sans-serif}
-.btn-outline:hover{background:#3352a3;color:#fff}
+/* MESSAGES */
+.m-err{background:#fff3f3;border:1px solid #fcc;border-radius:4px;color:#721c24;padding:10px 12px;font-size:13px;margin-bottom:12px;display:flex;align-items:flex-start;gap:8px;line-height:1.5}
+.m-err i{flex-shrink:0;margin-top:2px}
+.m-ok{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:6px;color:#14532d;padding:16px;font-size:14px;text-align:center;line-height:1.7}
+.m-info{background:#eff6ff;border:1px solid #bfdbfe;border-radius:4px;color:#1e40af;padding:11px 13px;font-size:13px;line-height:1.6;margin-bottom:13px}
 
-.divider{display:flex;align-items:center;gap:10px;margin:16px 0;color:#aaa;font-size:12px}
-.divider::before,.divider::after{content:'';flex:1;height:1px;background:#e8e8e8}
+/* DASHBOARD */
+.dash{max-width:1280px;margin:0 auto;padding:36px 20px 60px}
+.dash-greet{margin-bottom:24px}
+.dash-greet h2{font-family:'Nunito',sans-serif;font-size:28px;font-weight:800;color:#1a2340}
+.dash-greet p{color:#6b7280;font-size:15px;margin-top:4px}
+.dash-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:13px;margin-bottom:22px}
+.dcard{background:#fff;border-radius:8px;box-shadow:0 1px 8px rgba(0,0,0,.06);padding:18px 14px;cursor:pointer;transition:transform .2s,box-shadow .2s;text-align:center;border-top:3px solid transparent}
+.dcard:hover{transform:translateY(-3px);box-shadow:0 6px 18px rgba(0,0,0,.1);border-top-color:#3352a3}
+.dcard-ic{width:46px;height:46px;border-radius:50%;background:#eaedfa;display:flex;align-items:center;justify-content:center;color:#3352a3;font-size:19px;margin:0 auto 10px}
+.dcard h3{font-size:13px;font-weight:700;color:#1a2340;margin-bottom:3px}
+.dcard p{font-size:11px;color:#9ca3af}
+.dash-info{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:600px){.dash-info{grid-template-columns:1fr}}
+.di-card{background:#fff;border-radius:8px;box-shadow:0 1px 8px rgba(0,0,0,.06);padding:18px}
+.di-card h4{font-size:13px;font-weight:700;color:#3352a3;border-bottom:1px solid #f0f0f0;padding-bottom:9px;margin-bottom:11px;display:flex;align-items:center;gap:6px}
+.di-row{display:flex;justify-content:space-between;align-items:center;font-size:13px;padding:5px 0;border-bottom:1px solid #f8f8f8}
+.di-row:last-child{border-bottom:none}
+.di-row span{color:#6b7280}
+.di-row strong{color:#1a2340;font-size:12px;word-break:break-all;text-align:right;max-width:65%}
+.badge{font-size:11px;font-weight:700;padding:2px 8px;border-radius:12px;display:inline-block}
+.bg-green{background:#d1fae5;color:#065f46}
+.bg-blue{background:#dbeafe;color:#1e40af}
+.bg-purple{background:#ede9fe;color:#5b21b6}
+.token-pre{background:#1e2d5a;border-radius:5px;padding:10px;font-size:10px;font-family:monospace;color:#7dd3fc;word-break:break-all;max-height:72px;overflow-y:auto;margin-top:6px}
 
-.forgot-row{display:flex;justify-content:space-between;margin-top:12px;font-size:13px}
-.link{color:#3352a3;cursor:pointer;text-decoration:none;font-weight:500}
-.link:hover{text-decoration:underline}
-.back-link{display:inline-flex;align-items:center;gap:6px;color:#3352a3;font-size:13px;cursor:pointer;margin-bottom:18px;font-weight:600;background:none;border:none;padding:0}
-.back-link:hover{text-decoration:underline}
+/* FOOTER */
+.footer{background:#1a2849;color:#8895b5;margin-top:auto}
+.fi{max-width:1280px;margin:0 auto;padding:44px 20px 28px;display:grid;grid-template-columns:1.4fr repeat(4,1fr);gap:28px}
+@media(max-width:900px){.fi{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:500px){.fi{grid-template-columns:1fr}}
+.f-logo{height:40px;margin-bottom:10px;display:block}
+.f-tag{font-size:12px;line-height:1.75;color:#5a6a8a}
+.fcol h5{color:#e2e8f0;font-size:12px;font-weight:700;margin-bottom:11px;letter-spacing:.5px;text-transform:uppercase}
+.fcol ul{list-style:none}
+.fcol li{margin-bottom:8px}
+.fcol a{color:#6a7a9e;text-decoration:none;font-size:12px;transition:color .15s}
+.fcol a:hover{color:#fff}
+.f-bot{border-top:1px solid rgba(255,255,255,.06)}
+.f-bot-in{max-width:1280px;margin:0 auto;padding:13px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;font-size:11px}
+.f-links{display:flex;gap:16px;flex-wrap:wrap}
+.f-links a{color:#5a6a8a;text-decoration:none;font-size:11px;transition:color .15s}
+.f-links a:hover{color:#fff}
+.f-soc{display:flex;gap:12px}
+.f-soc a{color:#5a6a8a;font-size:14px;transition:color .15s}
+.f-soc a:hover{color:#fff}
 
-.or-redirect{text-align:center;margin-top:14px;font-size:12px;color:#999}
-.or-redirect a{color:#3352a3;cursor:pointer}
-.or-redirect a:hover{text-decoration:underline}
-
-/* ══ DASHBOARD ══ */
-.dash-wrap{max-width:1280px;margin:0 auto;padding:36px 20px 60px}
-.dash-greeting{margin-bottom:28px}
-.dash-greeting h2{font-family:'Nunito',sans-serif;font-size:28px;font-weight:800;color:#1a2340}
-.dash-greeting p{color:#6b7280;font-size:15px;margin-top:4px}
-.dash-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:28px}
-.d-card{background:#fff;border-radius:8px;box-shadow:0 1px 8px rgba(0,0,0,.07);padding:22px 16px;cursor:pointer;transition:transform .2s,box-shadow .2s;text-align:center;border-top:3px solid transparent}
-.d-card:hover{transform:translateY(-3px);box-shadow:0 6px 20px rgba(0,0,0,.1);border-top-color:#3352a3}
-.d-card-icon{width:50px;height:50px;border-radius:50%;background:#eef1fc;display:flex;align-items:center;justify-content:center;color:#3352a3;font-size:20px;margin:0 auto 12px}
-.d-card h3{font-size:14px;font-weight:700;color:#1a2340;margin-bottom:4px}
-.d-card p{font-size:12px;color:#9ca3af}
-.dash-info{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-@media(max-width:600px){.dash-cards{grid-template-columns:repeat(2,1fr)}.dash-info{grid-template-columns:1fr}}
-.d-info-card{background:#fff;border-radius:8px;box-shadow:0 1px 8px rgba(0,0,0,.07);padding:20px}
-.d-info-card h4{font-size:13px;font-weight:700;color:#3352a3;border-bottom:1px solid #f0f0f0;padding-bottom:10px;margin-bottom:12px;display:flex;align-items:center;gap:6px}
-.d-row{display:flex;justify-content:space-between;align-items:center;font-size:13px;padding:6px 0;border-bottom:1px solid #f7f7f7}
-.d-row:last-child{border-bottom:none}
-.d-row span:first-child{color:#6b7280}
-.d-row strong{color:#1a2340;font-size:13px;word-break:break-all;text-align:right;max-width:65%}
-.badge-active{background:#d1fae5;color:#065f46;font-size:11px;font-weight:700;padding:2px 8px;border-radius:12px;white-space:nowrap}
-.badge-verified{background:#dbeafe;color:#1e40af;font-size:11px;font-weight:700;padding:2px 8px;border-radius:12px}
-
-/* ══ FOOTER ══ */
-.site-footer{background:#1e2d5a;color:#9ba5c5;margin-top:60px}
-.footer-main{max-width:1280px;margin:0 auto;padding:48px 20px 32px;display:grid;grid-template-columns:1.5fr repeat(4,1fr);gap:32px}
-@media(max-width:900px){.footer-main{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:500px){.footer-main{grid-template-columns:1fr}}
-.footer-logo-img{height:44px;margin-bottom:10px;display:block}
-.footer-tagline{font-size:13px;line-height:1.7;color:#6b7a9e}
-.footer-col h5{color:#e2e8f0;font-size:13px;font-weight:700;margin-bottom:12px;letter-spacing:.5px;text-transform:uppercase}
-.footer-col ul{list-style:none}
-.footer-col ul li{margin-bottom:8px}
-.footer-col ul li a{color:#7a87ad;text-decoration:none;font-size:13px;transition:color .15s}
-.footer-col ul li a:hover{color:#fff}
-.footer-bottom{border-top:1px solid rgba(255,255,255,.07);padding:16px 20px}
-.footer-bottom-inner{max-width:1280px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;font-size:12px}
-.footer-links{display:flex;gap:20px;flex-wrap:wrap}
-.footer-links a{color:#6b7a9e;text-decoration:none;transition:color .15s;font-size:12px;display:flex;align-items:center;gap:5px}
-.footer-links a:hover{color:#fff}
-.footer-social{display:flex;gap:14px}
-.footer-social a{color:#6b7a9e;font-size:16px;transition:color .15s}
-.footer-social a:hover{color:#fff}
-.scroll-top{color:#6b7a9e;cursor:pointer;font-size:12px;display:flex;align-items:center;gap:6px;transition:color .15s}
-.scroll-top:hover{color:#fff}
-
-/* ══ PAGE LOADER ══ */
-.page-loader{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;gap:16px;color:#4a5568}
-.page-loader .big-spin{width:44px;height:44px;border:3px solid #e0e6f5;border-top-color:#3352a3;border-radius:50%;animation:spin .8s linear infinite}
-.page-loader p{font-size:15px}
-
-/* ══ MEMBER REGISTRATION FLOW ══ */
-.reg-info{background:#f0f4ff;border-radius:6px;padding:14px 16px;margin-bottom:18px}
-.reg-info-title{font-size:13px;font-weight:700;color:#3352a3;margin-bottom:8px;display:flex;align-items:center;gap:6px}
-.reg-info ul{font-size:13px;color:#555;line-height:1.9;padding-left:18px}
-.reg-steps{display:flex;flex-direction:column;gap:10px;margin-bottom:20px}
-.reg-step{display:flex;gap:12px;align-items:flex-start;font-size:14px;color:#444}
-.reg-step-num{width:22px;height:22px;border-radius:50%;background:#3352a3;color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
-
-/* ══ REGISTER TABS ══ */
-.auth-note{text-align:center;font-size:12px;color:#888;margin-top:12px}
-
-/* Responsive */
-@media(max-width:600px){
-  .hero-layout{padding:24px 16px 40px}
-  .lc-body{padding:18px 16px 16px}
-  .footer-main{padding:32px 16px 24px}
-  .dash-wrap{padding:24px 16px 40px}
-}
+/* PAGE LOAD */
+.page-load{display:flex;align-items:center;justify-content:center;min-height:60vh;flex-direction:column;gap:14px;color:#6b7280}
+.big-spin{width:40px;height:40px;border:3px solid #e0e6f5;border-top-color:#3352a3;border-radius:50%;animation:spin .85s linear infinite}
 </style>
 </head>
 <body>
-<div id="root" style="display:flex;flex-direction:column;min-height:100vh"></div>
+<div id="root"></div>
 
 <script>
-/* ══ BASE64 ASSETS ══ */
 window.ASSETS = {
-  logo: "data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPCEtLSBHZW5lcmF0b3I6IEFkb2JlIElsbHVzdHJhdG9yIDI3LjAuMCwgU1ZHIEV4cG9ydCBQbHVnLUluIC4gU1ZHIFZlcnNpb246IDYuMDAgQnVpbGQgMCkgIC0tPgo8c3ZnIHZlcnNpb249IjEuMSIgaWQ9IkxheWVyXzEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHg9IjBweCIgeT0iMHB4IgoJIHZpZXdCb3g9IjAgMCAyMjEuMzYgNDcuNTYiIHN0eWxlPSJlbmFibGUtYmFja2dyb3VuZDpuZXcgMCAwIDIyMS4zNiA0Ny41NjsiIHhtbDpzcGFjZT0icHJlc2VydmUiPgo8c3R5bGUgdHlwZT0idGV4dC9jc3MiPgoJLnN0MHtmaWxsOiM2MDJEODY7fQoJLnN0MXtmaWxsOm5vbmU7c3Ryb2tlOiNFRTJBN0I7c3Ryb2tlLXdpZHRoOjAuMjA4Mjt9Cgkuc3Qye2ZpbGw6dXJsKCNTVkdJRF8xXyk7fQoJLnN0M3tmaWxsOiNGRkZGRkY7fQoJLnN0NHtmaWxsOiNBN0E5QUM7fQo8L3N0eWxlPgo8Zz4KCTxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik02Mi4yMiwzMC42N2MzLjI3LDAsNS4xMywwLjYxLDYuNDMsMi4xYzEuMDUsMS4xNywxLjczLDMuNTcsMS43Myw2LjA4YzAsMS4zNy0wLjI0LDIuOTMtMC42Myw0LjE1CgkJYy0wLjYxLDEuOTUtMS43OCwzLjEzLTMuNjksMy42NGMtMC44NiwwLjI0LTEuNzYsMC4zMi0zLjg0LDAuMzJoLTYuOTF2LTE2LjNINjIuMjJ6IE01OC43OCw0NC4wNmgzLjQ0YzEuNDcsMCwyLjU5LTAuMzcsMy4xNS0xCgkJYzAuNzMtMC44MywxLjItMi40OSwxLjItNC4yM2MwLTEuOTMtMC41Ni0zLjY3LTEuNDItNC40MmMtMC42OC0wLjU5LTEuNDktMC44My0yLjkzLTAuODNoLTMuNDRWNDQuMDZ6Ii8+Cgk8cGF0aCBjbGFzcz0ic3QwIiBkPSJNODUuMDUsMzMuNTdoLTQuNTJjLTIuNDQsMC4wMi0zLjE4LDAuMjQtMy45MywxLjJjLTAuNDksMC42OC0wLjYxLDEuMS0wLjcxLDIuNjRoOS4xNnYyLjkxaC05LjE2CgkJYzAuMjcsMi44MywxLjQ0LDMuNzQsNC43OSwzLjc0aDQuMzd2Mi45MWgtNC41MmMtMy4zMiwwLTUuMDEtMC40NC02LjI1LTEuNjZjLTEuNDktMS40NC0yLjMyLTMuNzktMi4zMi02LjU3CgkJYzAtMi44MywwLjg4LTUuMDYsMi42MS02LjYyYzEuMi0xLjA4LDIuMzUtMS40NCw0LjYyLTEuNDRoNS44NlYzMy41N3oiLz4KCTxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik05MS4wOSw0Ni45NmgtMy4zdi0xNi4zaDQuNDJsNi41LDEyLjE0VjMwLjY3aDMuM3YxNi4zaC00LjI1bC02LjY3LTExLjk1VjQ2Ljk2eiIvPgoJPHBhdGggY2xhc3M9InN0MCIgZD0iTTEwMy43MSwzMy41N3YtMi45MWgxNC4wNXYyLjkxaC01LjM4djEzLjM5aC0zLjQ3VjMzLjU3SDEwMy43MXoiLz4KCTxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik0xMjIuNywzMC42N2gzLjk4bDYuNzQsMTYuM2gtNC4wNmwtMS41Ni0zLjc5aC02LjIxbC0xLjU2LDMuNzloLTQuMDhMMTIyLjcsMzAuNjd6IE0xMjIuMzgsNDAuMjdoNC42NAoJCWwtMi4zMi01LjY5TDEyMi4zOCw0MC4yN3oiLz4KCTxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik0xMzguNDksMzAuNjd2OS4xNGMwLjEsMi43MSwwLjE1LDIuODgsMC44MSwzLjU0YzAuNjYsMC41NiwxLjQ0LDAuNzEsMy41NywwLjcxaDMuMzJ2Mi45MWgtMy42OQoJCWMtMy4yLDAuMDUtNC4yOC0wLjIyLTUuNjctMS4zYy0xLjQ0LTEuMy0xLjc4LTIuNDQtMS44MS01Ljg2di05LjE0SDEzOC40OXoiLz4KCTxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik0xNTcuOCw0Ni45NmgtMy40N3YtMTYuM2g4LjE0YzIuNzksMCwzLjgxLDAuMjksNC44NiwxLjM5YzEsMS4wNSwxLjU0LDIuNDIsMS41NCwzLjkxCgkJYzAsMS42Ni0wLjY0LDMuMjItMS43MSw0LjE4Yy0wLjk1LDAuODYtMS44OCwxLjEyLTMuNzksMS4xMmgtNS41N1Y0Ni45NnogTTE2Mi41MiwzOC4zNmMwLjg4LDAsMS40Mi0wLjEyLDEuNzgtMC40MgoJCWMwLjQ2LTAuMzcsMC43Ni0xLjE3LDAuNzYtMi4xYzAtMS4wNS0wLjQxLTEuODEtMS4xNS0yLjFjLTAuMjktMC4xMi0wLjcxLTAuMTctMS4zMi0wLjE3aC00Ljc5djQuNzlIMTYyLjUyeiIvPgoJPHBhdGggY2xhc3M9InN0MCIgZD0iTTE3NC4xNiwzMC42N3Y5LjE0YzAuMSwyLjcxLDAuMTUsMi44OCwwLjgxLDMuNTRjMC42NiwwLjU2LDEuNDQsMC43MSwzLjU3LDAuNzFoMy4zMnYyLjkxaC0zLjY5CgkJYy0zLjIsMC4wNS00LjI4LTAuMjItNS42Ny0xLjNjLTEuNDQtMS4zLTEuNzgtMi40NC0xLjgxLTUuODZ2LTkuMTRIMTc0LjE2eiIvPgoJPHBhdGggY2xhc3M9InN0MCIgZD0iTTE4OS41OCwzMC42N2gzLjk4bDYuNzQsMTYuM2gtNC4wNmwtMS41Ni0zLjc5aC02LjIxbC0xLjU2LDMuNzloLTQuMDhMMTg5LjU4LDMwLjY3eiBNMTg5LjI2LDQwLjI3aDQuNjQKCQlsLTIuMzItNS42OUwxODkuMjYsNDAuMjd6Ii8+Cgk8cGF0aCBjbGFzcz0ic3QwIiBkPSJNMjA1LjM3LDQ2Ljk2aC0zLjN2LTE2LjNoNC40Mmw2LjUsMTIuMTRWMzAuNjdoMy4zdjE2LjNoLTQuMjVsLTYuNjctMTEuOTVWNDYuOTZ6Ii8+CjwvZz4KPGc+Cgk8cGF0aCBjbGFzcz0ic3QwIiBkPSJNNjAuODcsMC4zNXYxNC42NmMwLjE2LDQuMzUsMC4yNCw0LjYzLDEuMjksNS42OGMxLjA2LDAuOSwyLjMxLDEuMTQsNS43MiwxLjE0aDUuMzN2NC42N0g2Ny4zCgkJYy01LjE0LDAuMDgtNi44Ni0wLjM1LTkuMS0yLjA4Yy0yLjMxLTIuMDgtMi44Ni0zLjkyLTIuOS05LjQxVjAuMzVINjAuODd6Ii8+Cgk8cGF0aCBjbGFzcz0ic3QwIiBkPSJNNzYuODgsMC4zNWg1LjU3VjI2LjVoLTUuNTdWMC4zNXoiLz4KCTxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik04OC4xNywwLjM1aDE0Ljc4YzIuMzUsMCw0LDAuMjcsNS4wNiwwLjc4YzIuMDgsMS4wNiwzLjQ1LDMuNDksMy40NSw2LjA4YzAsMi43LTEuNjEsNS4yOS0zLjgsNi4yMwoJCWMyLjUxLDEuMTQsMy44LDMuMjEsMy44LDYuMTJjMCwzLjAyLTEuMzMsNS4yNS0zLjY1LDYuMjdjLTEuMDYsMC40Ny0yLjY3LDAuNjctNS4xOCwwLjY3SDg4LjE3VjAuMzV6IE0xMDEuMywxMS4wOQoJCWMxLjU3LDAsMi4xMi0wLjEyLDIuNzgtMC42M2MwLjc0LTAuNTksMS4yMi0xLjU3LDEuMjItMi41OWMwLTEuMDItMC40My0xLjg0LTEuMTQtMi4zMWMtMC42Ny0wLjQzLTEuMjYtMC41NS0yLjc0LTAuNTVoLTcuNjh2Ni4wOAoJCUgxMDEuM3ogTTEwMS4zLDIxLjg0YzEuNjEsMCwyLjE2LTAuMTIsMi44Mi0wLjYzYzAuNzQtMC41OSwxLjIyLTEuNTcsMS4yMi0yLjU5YzAtMS4wMi0wLjQzLTEuODQtMS4xNC0yLjMxCgkJYy0wLjY3LTAuNDMtMS4yOS0wLjU1LTIuNzgtMC41NWgtNy42OHY2LjA4SDEwMS4zeiIvPgoJPHBhdGggY2xhc3M9InN0MCIgZD0iTTEzNS41OCw1LjAyaC03LjI1Yy0zLjkyLDAuMDQtNS4xLDAuMzktNi4zMSwxLjkyYy0wLjc4LDEuMS0wLjk4LDEuNzYtMS4xNCw0LjI0aDE0Ljd2NC42N2gtMTQuNwoJCWMwLjQzLDQuNTUsMi4zMSw2LDcuNjgsNmg3LjAydjQuNjdoLTcuMjVjLTUuMzMsMC04LjA0LTAuNzEtMTAuMDQtMi42N2MtMi4zOS0yLjMxLTMuNzItNi4wOC0zLjcyLTEwLjU1CgkJYzAtNC41NSwxLjQxLTguMTIsNC4xOS0xMC42MmMxLjkyLTEuNzMsMy43Ni0yLjMxLDcuNDEtMi4zMWg5LjQxVjUuMDJ6Ii8+Cgk8cGF0aCBjbGFzcz0ic3QwIiBkPSJNMTQ1LjkzLDI2LjVoLTUuNTdWMC4zNWgxMi43OGMzLjgsMCw2LjEyLDAuNDMsNy42NSwxLjQxYzEuOTYsMS4yNSwzLjEsMy40MSwzLjEsNS44OAoJCWMwLDIuMzUtMC43MSw0LjQ3LTEuODgsNS43NmMtMC44NiwwLjktMS42MSwxLjM3LTMuMSwxLjg4YzMuMDYsMC44Miw0LjU1LDMuMTgsNC43NCw3LjI1YzAuMiwyLjQzLDAuMjgsMi45OCwwLjYzLDMuOTZoLTYuMjMKCQljLTAuMi0wLjU5LTAuMjMtMC43OC0wLjMxLTEuMzNjLTAuMDQtMC4yNC0wLjEyLTEuMDItMC4yMy0yLjM5Yy0wLjM5LTQuNTktMi4yOC02LjIzLTcuMS02LjE5aC00LjQ3VjI2LjV6IE0xNTMuNzQsMTEuOTIKCQljMS4zNywwLDIuMi0wLjIsMi43NC0wLjU5YzAuNzgtMC41NSwxLjI1LTEuNjksMS4yNS0zLjAyYzAtMS41My0wLjY3LTIuNjMtMS44NC0zLjA2Yy0wLjQ3LTAuMTYtMS4xOC0wLjI0LTIuMTYtMC4yNGgtNy44djYuOQoJCUgxNTMuNzR6Ii8+Cgk8cGF0aCBjbGFzcz0ic3QwIiBkPSJNMTY2LjM2LDUuMDJWMC4zNWgyMi41NHY0LjY3aC04LjYzVjI2LjVoLTUuNTdWNS4wMkgxNjYuMzZ6Ii8+Cgk8cGF0aCBjbGFzcz0ic3QwIiBkPSJNMTkwLjY0LDAuMzVoNi41MWw2LDEwLjE5bDYuMzUtMTAuMTloNi41OWwtMTAuMTksMTQuOVYyNi41aC01LjU3VjE1LjA1TDE5MC42NCwwLjM1eiIvPgo8L2c+CjxnPgoJPHBhdGggY2xhc3M9InN0MSIgZD0iTTYuOTEsMjIuNzEiLz4KCTxnPgoJCTxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik00Ni45NiwzOS45NmMwLDMuODYtMy4xMyw2Ljk5LTYuOTksNi45OUg3LjM0Yy0zLjg2LDAtNi45OS0zLjEzLTYuOTktNi45OVY3LjM0YzAtMy44NiwzLjEzLTYuOTksNi45OS02Ljk5CgkJCWgzMi42MmMzLjg2LDAsNi45OSwzLjEzLDYuOTksNi45OVYzOS45NnoiLz4KCQk8bGluZWFyR3JhZGllbnQgaWQ9IlNWR0lEXzFfIiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgeDE9IjIzLjkyNjIiIHkxPSIwLjE4NDkiIHgyPSIyMy4yNzkyIiB5Mj0iMzIuMzIxNSI+CgkJCTxzdG9wICBvZmZzZXQ9IjIuNTEyNTYzZS0wMyIgc3R5bGU9InN0b3AtY29sb3I6IzYwMkQ4NiIvPgoJCQk8c3RvcCAgb2Zmc2V0PSIxIiBzdHlsZT0ic3RvcC1jb2xvcjojOUU4MkI1Ii8+CgkJPC9saW5lYXJHcmFkaWVudD4KCQk8cGF0aCBjbGFzcz0ic3QyIiBkPSJNNDYuOTYsMTkuNzdWNy4zNGMwLTMuODYtMy4xMy02Ljk5LTYuOTktNi45OUg3LjM1Yy0zLjg2LDAtNi45OSwzLjEzLTYuOTksNi45OXY5LjM4CgkJCWMwLDAsMi44NiwxNS41MywyMy4zMSwxNS41M0M0MS40NywzMi4yNSw0Ni45NiwxOS43Nyw0Ni45NiwxOS43N3oiLz4KCTwvZz4KCTxnPgoJCTxwYXRoIGNsYXNzPSJzdDMiIGQ9Ik0xNy40NywzNy44NWgxNS45NmMyLjc4LDAsNC42Mi0wLjQ5LDUuMjItMC44NmMwLjk5LTAuNjIsMS44NC0yLjM3LDIuNTUtMy41M2wwLjg0LDAuMjNsLTIuNTUsNy43OEg0Ljg4CgkJCXYtMC42N2MxLjUxLTAuMDQsMi4zOS0wLjI0LDIuODgtMC42N2MwLjQ5LTAuNDUsMC43My0xLjMsMC43My0yLjU2VjkuNTFjMC0xLjI2LTAuMjQtMi4xLTAuNzMtMi41NgoJCQlDNy4yNyw2LjUzLDYuMzksNi4zMyw0Ljg4LDYuMjl2LTAuN2gxNi4zMXYwLjdjLTEuNTEsMC4wMy0yLjQ5LDAuMjQtMi45OCwwLjY3Yy0wLjQ5LDAuNDYtMC43MywxLjMtMC43MywyLjU2VjM3Ljg1eiIvPgoJPC9nPgoJPGc+CgkJPGc+CgkJCTxwb2x5Z29uIGNsYXNzPSJzdDMiIHBvaW50cz0iMjMuNTQsMzAuNjEgMjUuOTEsMjkuMzkgMzAuOTEsNDEuNDIgCQkJIi8+CgkJPC9nPgoJCTxnPgoJCQk8cG9seWdvbiBjbGFzcz0ic3QzIiBwb2ludHM9IjIzLjcyLDE2Ljc0IDIxLjMsMTcuOTEgMTYuNCw1Ljc2IAkJCSIvPgoJCTwvZz4KCQk8Zz4KCQkJPHBvbHlnb24gY2xhc3M9InN0MyIgcG9pbnRzPSIzMC43NywyMy41OCAyOS4zNSwyMS4zNCA0MS40LDE2LjQ0IAkJCSIvPgoJCTwvZz4KCQk8Zz4KCQkJPHBvbHlnb24gY2xhc3M9InN0MyIgcG9pbnRzPSIxNS41LDI0LjI5IDE3Ljg2LDI1Ljk2IDUuNzMsMzAuODIgCQkJIi8+CgkJPC9nPgoJCTxnPgoJCQk8cG9seWdvbiBjbGFzcz0ic3Q0IiBwb2ludHM9IjE3Ljg2LDI1Ljk2IDIzLjYsMjMuNjUgMTMuODksNDYuOTcgCQkJIi8+CgkJPC9nPgoJCTxnPgoJCQk8cG9seWdvbiBjbGFzcz0ic3Q0IiBwb2ludHM9IjI5LjM1LDIxLjM0IDIzLjYsMjMuNjUgMzMuNTQsMC4zNyAJCQkiLz4KCQk8L2c+CgkJPGc+CgkJCTxwb2x5Z29uIGNsYXNzPSJzdDQiIHBvaW50cz0iMjUuOTEsMjkuMzkgMjMuNiwyMy42NSA0Ni44NSwzMy41MSAJCQkiLz4KCQk8L2c+CgkJPGc+CgkJCTxwb2x5Z29uIGNsYXNzPSJzdDQiIHBvaW50cz0iMjEuMywxNy45MSAyMy42LDIzLjY1IDAuMzUsMTMuNzMgCQkJIi8+CgkJPC9nPgoJPC9nPgoJPGc+CgkJPGc+CgkJCTxwb2x5Z29uIGNsYXNzPSJzdDMiIHBvaW50cz0iMjkuOTIsMTguNDggMjkuMDcsMjIuNzEgNDEuNDEsMTYuNDMgCQkJIi8+CgkJPC9nPgoJCTxnPgoJCQk8cG9seWdvbiBjbGFzcz0ic3QzIiBwb2ludHM9IjE3LjMzLDI4Ljc3IDE4LjA1LDI0Ljk1IDUuNzMsMzAuODIgCQkJIi8+CgkJPC9nPgoJCTxnPgoJCQk8cG9seWdvbiBjbGFzcz0ic3QzIiBwb2ludHM9IjI4Ljc3LDI5Ljk2IDI0LjQxLDI5IDMwLjksNDEuNDEgCQkJIi8+CgkJPC9nPgoJCTxnPgoJCQk8cG9seWdvbiBjbGFzcz0ic3QzIiBwb2ludHM9IjE4LjQ0LDE3LjM0IDIyLjMzLDE4LjEyIDE2LjQsNS43NiAJCQkiLz4KCQk8L2c+CgkJPGc+CgkJCTxwb2x5Z29uIGNsYXNzPSJzdDMiIHBvaW50cz0iMjkuMzUsMjEuMzQgMjMuNiwyMy42NSA0Ni44NiwzMy41MSAJCQkiLz4KCQk8L2c+CgkJPGc+CgkJCTxwb2x5Z29uIGNsYXNzPSJzdDMiIHBvaW50cz0iMTcuODYsMjUuOTYgMjMuNiwyMy42NSAwLjM1LDEzLjczIAkJCSIvPgoJCTwvZz4KCQk8Zz4KCQkJPHBvbHlnb24gY2xhc3M9InN0MyIgcG9pbnRzPSIyNS45MSwyOS4zOSAyMy42LDIzLjY1IDEzLjg5LDQ2Ljk2IAkJCSIvPgoJCTwvZz4KCQk8Zz4KCQkJPHBvbHlnb24gY2xhc3M9InN0MyIgcG9pbnRzPSIyMS4zLDE3LjkxIDIzLjYsMjMuNjUgMzMuNTQsMC4zNyAJCQkiLz4KCQk8L2c+Cgk8L2c+CjwvZz4KPGc+Cgk8cGF0aCBjbGFzcz0ic3QwIiBkPSJNMjE5LjI2LDQyLjk3YzAuMzMsMCwwLjY2LDAuMDksMC45NywwLjI2YzAuMzIsMC4xNywwLjU2LDAuNDEsMC43NCwwLjczYzAuMTgsMC4zMiwwLjI2LDAuNjUsMC4yNiwwLjk5CgkJYzAsMC4zNC0wLjA5LDAuNjctMC4yNiwwLjk4Yy0wLjE3LDAuMzEtMC40MiwwLjU2LTAuNzMsMC43M2MtMC4zMSwwLjE3LTAuNjQsMC4yNi0wLjk4LDAuMjZzLTAuNjctMC4wOS0wLjk4LTAuMjYKCQlzLTAuNTYtMC40Mi0wLjczLTAuNzNjLTAuMTctMC4zMS0wLjI2LTAuNjQtMC4yNi0wLjk4YzAtMC4zNCwwLjA5LTAuNjcsMC4yNy0wLjk5YzAuMTgtMC4zMiwwLjQyLTAuNTYsMC43NC0wLjczCgkJQzIxOC42LDQzLjA1LDIxOC45Myw0Mi45NywyMTkuMjYsNDIuOTd6IE0yMTkuMjYsNDMuMjljLTAuMjgsMC0wLjU1LDAuMDctMC44MSwwLjIxYy0wLjI2LDAuMTQtMC40NywwLjM1LTAuNjIsMC42MQoJCWMtMC4xNSwwLjI2LTAuMjIsMC41NC0wLjIyLDAuODNjMCwwLjI4LDAuMDcsMC41NiwwLjIyLDAuODJjMC4xNSwwLjI2LDAuMzUsMC40NiwwLjYxLDAuNjFjMC4yNiwwLjE1LDAuNTQsMC4yMiwwLjgyLDAuMjIKCQlzMC41Ni0wLjA3LDAuODItMC4yMmMwLjI2LTAuMTUsMC40Ny0wLjM1LDAuNjEtMC42MWMwLjE1LTAuMjYsMC4yMi0wLjUzLDAuMjItMC44MmMwLTAuMjktMC4wNy0wLjU2LTAuMjItMC44MwoJCWMtMC4xNS0wLjI2LTAuMzUtMC40Ny0wLjYyLTAuNjFDMjE5LjgxLDQzLjM3LDIxOS41NCw0My4yOSwyMTkuMjYsNDMuMjl6IE0yMTguMzksNDYuMDR2LTIuMTNoMC43M2MwLjI1LDAsMC40MywwLjAyLDAuNTQsMC4wNgoJCWMwLjExLDAuMDQsMC4yLDAuMTEsMC4yNywwLjIxczAuMSwwLjIsMC4xLDAuMzFjMCwwLjE2LTAuMDYsMC4yOS0wLjE3LDAuNDFjLTAuMTEsMC4xMi0wLjI2LDAuMTgtMC40NCwwLjE5CgkJYzAuMDgsMC4wMywwLjE0LDAuMDcsMC4xOCwwLjExYzAuMDksMC4wOCwwLjE5LDAuMjIsMC4zMSwwLjQybDAuMjYsMC40MmgtMC40MmwtMC4xOS0wLjM0Yy0wLjE1LTAuMjYtMC4yNy0wLjQzLTAuMzYtMC41CgkJYy0wLjA2LTAuMDUtMC4xNS0wLjA3LTAuMjgtMC4wN2gtMC4ydjAuOUgyMTguMzl6IE0yMTguNzQsNDQuODRoMC40MmMwLjIsMCwwLjMzLTAuMDMsMC40MS0wLjA5YzAuMDctMC4wNiwwLjExLTAuMTQsMC4xMS0wLjI0CgkJYzAtMC4wNi0wLjAyLTAuMTItMC4wNS0wLjE3cy0wLjA4LTAuMDktMC4xNS0wLjExYy0wLjA2LTAuMDItMC4xOC0wLjA0LTAuMzQtMC4wNGgtMC4zOVY0NC44NHoiLz4KPC9nPgo8L3N2Zz4K",
-  footerLogo: "data:image/png;base64,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",
-  arrowUp: "data:image/png;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADb/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCAAPAA8DASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAABgX/xAAjEAABBAAGAwEBAAAAAAAAAAABAgMEBQYHCBESMQATIUNR/8QAFAEBAAAAAAAAAAAAAAAAAAAAAP/EABQRAQAAAAAAAAAAAAAAAAAAAAD/2gAMAwEAAhEDEQA/ACml7JCkEvD+Mc1UNtxrmSGcO0b6N1WK+JX7XEH8gkFQB+K+b/CkLiakslauAqwx1lY4LLDLVg7Cs4DAKnaqUhzgpHHv1lXX83HaSD4Z0zX9tZ6hMvm7i2mzWYEgRIaZDynAw3wWEtoB34p3PQ+eGc17u2h5m4/roNpMjwJ+IJapUdp5SG3+Elwo5pB2VsTuN+j4H//Z",
-  langIcon: "data:image/png;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADb/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCAAQACADASIAAhEBAxEB/8QAGAABAAMBAAAAAAAAAAAAAAAABQECBAf/xAAoEAABBAIBBAEDBQAAAAAAAAABAgMEBQYRBwASIUEIExRyFTFhcYH/xAAUAQEAAAAAAAAAAAAAAAAAAAAA/8QAFBEBAAAAAAAAAAAAAAAAAAAAAP/aAAwDAQACEQMRAD8A758heQrHjbDq04vVxLC+s57VfWQXUq+mfBKiUpIPalKdeCNEjqJGWsZ38YLPLY6UIFli0t1xtB2G3ft1pcQPxWFJ/wA6P5Y4lmcm8k45ey8nk12N09e6Y36VKUzM+7dUNuJcCSkIKAjyDvwfR6Mxnju04v4A5FxeTaM2FUI9pIpyCousxlsKIbcJAHdsEnXjaj/QBRjOLPCeGsEk1+E3WTJfoIxdXAKAiKER2tFwqI0Fdx1+J/jrHwnzHd55kEnCsn4+saq6gR93LgSkxI5WCW0KBUVDvT+wO/frpN/FrDNvi3UYpWSK+PIs8cgMF2cwXW0ILTXcrtBB7gkEpPpQB6t8e+MJnElNfVk68g2sOTMEtqcY5akqHZpf11FRB1rx58DZ96Af/9k=",
-  infoIcon: "data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyBpZD0iTGF5ZXJfMiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB2aWV3Qm94PSIwIDAgNTYuMDQgNTYuMDQiPgogIDxkZWZzPgogICAgPHN0eWxlPgogICAgICAuY2xzLTEgewogICAgICAgIGZpbGw6ICNmZmY7CiAgICAgIH0KCiAgICAgIC5jbHMtMiB7CiAgICAgICAgZmlsbDogIzMzNTJhMzsKICAgICAgfQogICAgPC9zdHlsZT4KICA8L2RlZnM+CiAgPGNpcmNsZSBjbGFzcz0iY2xzLTEiIGN4PSIyOC4wMiIgY3k9IjI4LjAyIiByPSIyNC43Ii8+CiAgPGc+CiAgICA8cGF0aCBjbGFzcz0iY2xzLTEiIGQ9Ik0yOC4wMiw1NC42MWMxNC42OCwwLDI2LjU5LTExLjkxLDI2LjU5LTI2LjU5UzQyLjcsMS40MywyOC4wMiwxLjQzLDEuNDMsMTMuMzQsMS40MywyOC4wMnMxMS45MSwyNi41OSwyNi41OSwyNi41OSIvPgogICAgPHBhdGggY2xhc3M9ImNscy0yIiBkPSJNNTIuMTMsMjguMDJjMC0xMy4zLTEwLjgxLTI0LjExLTI0LjExLTI0LjExUzMuOTEsMTQuNzIsMy45MSwyOC4wMnMxMC44MSwyNC4xMSwyNC4xMSwyNC4xMSwyNC4xMS0xMC44MSwyNC4xMS0yNC4xMU01Ni4wNCwyOC4wMmMwLDE1LjQ1LTEyLjU3LDI4LjAyLTI4LjAyLDI4LjAyUzAsNDMuNDcsMCwyOC4wMiwxMi41NywwLDI4LjAyLDBzMjguMDIsMTIuNTcsMjguMDIsMjguMDJNMjguMDIsMTQuOTljLTEuNDQsMC0yLjYsMS4xNy0yLjYsMi42czEuMTcsMi42MSwyLjYsMi42MSwyLjYxLTEuMTcsMi42MS0yLjYxLTEuMTctMi42LTIuNjEtMi42TTI5Ljk3LDI4LjAydjEzLjAzYzAsMS4wOC0uODcsMS45Ni0xLjk2LDEuOTZzLTEuOTUtLjg4LTEuOTUtMS45NnYtMTMuMDNjMC0xLjA4Ljg3LTEuOTYsMS45NS0xLjk2czEuOTYuODgsMS45NiwxLjk2Ii8+CiAgPC9nPgo8L3N2Zz4K"
+  logo:     "data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPCEtLSBHZW5lcmF0b3I6IEFkb2JlIElsbHVzdHJhdG9yIDI3LjAuMCwgU1ZHIEV4cG9ydCBQbHVnLUluIC4gU1ZHIFZlcnNpb246IDYuMDAgQnVpbGQgMCkgIC0tPgo8c3ZnIHZlcnNpb249IjEuMSIgaWQ9IkxheWVyXzEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHg9IjBweCIgeT0iMHB4IgoJIHZpZXdCb3g9IjAgMCAyMjEuMzYgNDcuNTYiIHN0eWxlPSJlbmFibGUtYmFja2dyb3VuZDpuZXcgMCAwIDIyMS4zNiA0Ny41NjsiIHhtbDpzcGFjZT0icHJlc2VydmUiPgo8c3R5bGUgdHlwZT0idGV4dC9jc3MiPgoJLnN0MHtmaWxsOiM2MDJEODY7fQoJLnN0MXtmaWxsOm5vbmU7c3Ryb2tlOiNFRTJBN0I7c3Ryb2tlLXdpZHRoOjAuMjA4Mjt9Cgkuc3Qye2ZpbGw6dXJsKCNTVkdJRF8xXyk7fQoJLnN0M3tmaWxsOiNGRkZGRkY7fQoJLnN0NHtmaWxsOiNBN0E5QUM7fQo8L3N0eWxlPgo8Zz4KCTxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik02Mi4yMiwzMC42N2MzLjI3LDAsNS4xMywwLjYxLDYuNDMsMi4xYzEuMDUsMS4xNywxLjczLDMuNTcsMS43Myw2LjA4YzAsMS4zNy0wLjI0LDIuOTMtMC42Myw0LjE1CgkJYy0wLjYxLDEuOTUtMS43OCwzLjEzLTMuNjksMy42NGMtMC44NiwwLjI0LTEuNzYsMC4zMi0zLjg0LDAuMzJoLTYuOTF2LTE2LjNINjIuMjJ6IE01OC43OCw0NC4wNmgzLjQ0YzEuNDcsMCwyLjU5LTAuMzcsMy4xNS0xCgkJYzAuNzMtMC44MywxLjItMi40OSwxLjItNC4yM2MwLTEuOTMtMC41Ni0zLjY3LTEuNDItNC40MmMtMC42OC0wLjU5LTEuNDktMC44My0yLjkzLTAuODNoLTMuNDRWNDQuMDZ6Ii8+Cgk8cGF0aCBjbGFzcz0ic3QwIiBkPSJNODUuMDUsMzMuNTdoLTQuNTJjLTIuNDQsMC4wMi0zLjE4LDAuMjQtMy45MywxLjJjLTAuNDksMC42OC0wLjYxLDEuMS0wLjcxLDIuNjRoOS4xNnYyLjkxaC05LjE2CgkJYzAuMjcsMi44MywxLjQ0LDMuNzQsNC43OSwzLjc0aDQuMzd2Mi45MWgtNC41MmMtMy4zMiwwLTUuMDEtMC40NC02LjI1LTEuNjZjLTEuNDktMS40NC0yLjMyLTMuNzktMi4zMi02LjU3CgkJYzAtMi44MywwLjg4LTUuMDYsMi42MS02LjYyYzEuMi0xLjA4LDIuMzUtMS40NCw0LjYyLTEuNDRoNS44NlYzMy41N3oiLz4KCTxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik05MS4wOSw0Ni45NmgtMy4zdi0xNi4zaDQuNDJsNi41LDEyLjE0VjMwLjY3aDMuM3YxNi4zaC00LjI1bC02LjY3LTExLjk1VjQ2Ljk2eiIvPgoJPHBhdGggY2xhc3M9InN0MCIgZD0iTTEwMy43MSwzMy41N3YtMi45MWgxNC4wNXYyLjkxaC01LjM4djEzLjM5aC0zLjQ3VjMzLjU3SDEwMy43MXoiLz4KCTxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik0xMjIuNywzMC42N2gzLjk4bDYuNzQsMTYuM2gtNC4wNmwtMS41Ni0zLjc5aC02LjIxbC0xLjU2LDMuNzloLTQuMDhMMTIyLjcsMzAuNjd6IE0xMjIuMzgsNDAuMjdoNC42NAoJCWwtMi4zMi01LjY5TDEyMi4zOCw0MC4yN3oiLz4KCTxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik0xMzguNDksMzAuNjd2OS4xNGMwLjEsMi43MSwwLjE1LDIuODgsMC44MSwzLjU0YzAuNjYsMC41NiwxLjQ0LDAuNzEsMy41NywwLjcxaDMuMzJ2Mi45MWgtMy42OQoJCWMtMy4yLDAuMDUtNC4yOC0wLjIyLTUuNjctMS4zYy0xLjQ0LTEuMy0xLjc4LTIuNDQtMS44MS01Ljg2di05LjE0SDEzOC40OXoiLz4KCTxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik0xNTcuOCw0Ni45NmgtMy40N3YtMTYuM2g4LjE0YzIuNzksMCwzLjgxLDAuMjksNC44NiwxLjM5YzEsMS4wNSwxLjU0LDIuNDIsMS41NCwzLjkxCgkJYzAsMS42Ni0wLjY0LDMuMjItMS43MSw0LjE4Yy0wLjk1LDAuODYtMS44OCwxLjEyLTMuNzksMS4xMmgtNS41N1Y0Ni45NnogTTE2Mi41MiwzOC4zNmMwLjg4LDAsMS40Mi0wLjEyLDEuNzgtMC40MgoJCWMwLjQ2LTAuMzcsMC43Ni0xLjE3LDAuNzYtMi4xYzAtMS4wNS0wLjQxLTEuODEtMS4xNS0yLjFjLTAuMjktMC4xMi0wLjcxLTAuMTctMS4zMi0wLjE3aC00Ljc5djQuNzlIMTYyLjUyeiIvPgoJPHBhdGggY2xhc3M9InN0MCIgZD0iTTE3NC4xNiwzMC42N3Y5LjE0YzAuMSwyLjcxLDAuMTUsMi44OCwwLjgxLDMuNTRjMC42NiwwLjU2LDEuNDQsMC43MSwzLjU3LDAuNzFoMy4zMnYyLjkxaC0zLjY5CgkJYy0zLjIsMC4wNS00LjI4LTAuMjItNS42Ny0xLjNjLTEuNDQtMS4zLTEuNzgtMi40NC0xLjgxLTUuODZ2LTkuMTRIMTc0LjE2eiIvPgoJPHBhdGggY2xhc3M9InN0MCIgZD0iTTE4OS41OCwzMC42N2gzLjk4bDYuNzQsMTYuM2gtNC4wNmwtMS41Ni0zLjc5aC02LjIxbC0xLjU2LDMuNzloLTQuMDhMMTg5LjU4LDMwLjY3eiBNMTg5LjI2LDQwLjI3aDQuNjQKCQlsLTIuMzItNS42OUwxODkuMjYsNDAuMjd6Ii8+Cgk8cGF0aCBjbGFzcz0ic3QwIiBkPSJNMjA1LjM3LDQ2Ljk2aC0zLjN2LTE2LjNoNC40Mmw2LjUsMTIuMTRWMzAuNjdoMy4zdjE2LjNoLTQuMjVsLTYuNjctMTEuOTVWNDYuOTZ6Ii8+CjwvZz4KPGc+Cgk8cGF0aCBjbGFzcz0ic3QwIiBkPSJNNjAuODcsMC4zNXYxNC42NmMwLjE2LDQuMzUsMC4yNCw0LjYzLDEuMjksNS42OGMxLjA2LDAuOSwyLjMxLDEuMTQsNS43MiwxLjE0aDUuMzN2NC42N0g2Ny4zCgkJYy01LjE0LDAuMDgtNi44Ni0wLjM1LTkuMS0yLjA4Yy0yLjMxLTIuMDgtMi44Ni0zLjkyLTIuOS05LjQxVjAuMzVINjAuODd6Ii8+Cgk8cGF0aCBjbGFzcz0ic3QwIiBkPSJNNzYuODgsMC4zNWg1LjU3VjI2LjVoLTUuNTdWMC4zNXoiLz4KCTxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik04OC4xNywwLjM1aDE0Ljc4YzIuMzUsMCw0LDAuMjcsNS4wNiwwLjc4YzIuMDgsMS4wNiwzLjQ1LDMuNDksMy40NSw2LjA4YzAsMi43LTEuNjEsNS4yOS0zLjgsNi4yMwoJCWMyLjUxLDEuMTQsMy44LDMuMjEsMy44LDYuMTJjMCwzLjAyLTEuMzMsNS4yNS0zLjY1LDYuMjdjLTEuMDYsMC40Ny0yLjY3LDAuNjctNS4xOCwwLjY3SDg4LjE3VjAuMzV6IE0xMDEuMywxMS4wOQoJCWMxLjU3LDAsMi4xMi0wLjEyLDIuNzgtMC42M2MwLjc0LTAuNTksMS4yMi0xLjU3LDEuMjItMi41OWMwLTEuMDItMC40My0xLjg0LTEuMTQtMi4zMWMtMC42Ny0wLjQzLTEuMjYtMC41NS0yLjc0LTAuNTVoLTcuNjh2Ni4wOAoJCUgxMDEuM3ogTTEwMS4zLDIxLjg0YzEuNjEsMCwyLjE2LTAuMTIsMi44Mi0wLjYzYzAuNzQtMC41OSwxLjIyLTEuNTcsMS4yMi0yLjU5YzAtMS4wMi0wLjQzLTEuODQtMS4xNC0yLjMxCgkJYy0wLjY3LTAuNDMtMS4yOS0wLjU1LTIuNzgtMC41NWgtNy42OHY2LjA4SDEwMS4zeiIvPgoJPHBhdGggY2xhc3M9InN0MCIgZD0iTTEzNS41OCw1LjAyaC03LjI1Yy0zLjkyLDAuMDQtNS4xLDAuMzktNi4zMSwxLjkyYy0wLjc4LDEuMS0wLjk4LDEuNzYtMS4xNCw0LjI0aDE0Ljd2NC42N2gtMTQuNwoJCWMwLjQzLDQuNTUsMi4zMSw2LDcuNjgsNmg3LjAydjQuNjdoLTcuMjVjLTUuMzMsMC04LjA0LTAuNzEtMTAuMDQtMi42N2MtMi4zOS0yLjMxLTMuNzItNi4wOC0zLjcyLTEwLjU1CgkJYzAtNC41NSwxLjQxLTguMTIsNC4xOS0xMC42MmMxLjkyLTEuNzMsMy43Ni0yLjMxLDcuNDEtMi4zMWg5LjQxVjUuMDJ6Ii8+Cgk8cGF0aCBjbGFzcz0ic3QwIiBkPSJNMTQ1LjkzLDI2LjVoLTUuNTdWMC4zNWgxMi43OGMzLjgsMCw2LjEyLDAuNDMsNy42NSwxLjQxYzEuOTYsMS4yNSwzLjEsMy40MSwzLjEsNS44OAoJCWMwLDIuMzUtMC43MSw0LjQ3LTEuODgsNS43NmMtMC44NiwwLjktMS42MSwxLjM3LTMuMSwxLjg4YzMuMDYsMC44Miw0LjU1LDMuMTgsNC43NCw3LjI1YzAuMiwyLjQzLDAuMjgsMi45OCwwLjYzLDMuOTZoLTYuMjMKCQljLTAuMi0wLjU5LTAuMjMtMC43OC0wLjMxLTEuMzNjLTAuMDQtMC4yNC0wLjEyLTEuMDItMC4yMy0yLjM5Yy0wLjM5LTQuNTktMi4yOC02LjIzLTcuMS02LjE5aC00LjQ3VjI2LjV6IE0xNTMuNzQsMTEuOTIKCQljMS4zNywwLDIuMi0wLjIsMi43NC0wLjU5YzAuNzgtMC41NSwxLjI1LTEuNjksMS4yNS0zLjAyYzAtMS41My0wLjY3LTIuNjMtMS44NC0zLjA2Yy0wLjQ3LTAuMTYtMS4xOC0wLjI0LTIuMTYtMC4yNGgtNy44djYuOQoJCUgxNTMuNzR6Ii8+Cgk8cGF0aCBjbGFzcz0ic3QwIiBkPSJNMTY2LjM2LDUuMDJWMC4zNWgyMi41NHY0LjY3aC04LjYzVjI2LjVoLTUuNTdWNS4wMkgxNjYuMzZ6Ii8+Cgk8cGF0aCBjbGFzcz0ic3QwIiBkPSJNMTkwLjY0LDAuMzVoNi41MWw2LDEwLjE5bDYuMzUtMTAuMTloNi41OWwtMTAuMTksMTQuOVYyNi41aC01LjU3VjE1LjA1TDE5MC42NCwwLjM1eiIvPgo8L2c+CjxnPgoJPHBhdGggY2xhc3M9InN0MSIgZD0iTTYuOTEsMjIuNzEiLz4KCTxnPgoJCTxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik00Ni45NiwzOS45NmMwLDMuODYtMy4xMyw2Ljk5LTYuOTksNi45OUg3LjM0Yy0zLjg2LDAtNi45OS0zLjEzLTYuOTktNi45OVY3LjM0YzAtMy44NiwzLjEzLTYuOTksNi45OS02Ljk5CgkJCWgzMi42MmMzLjg2LDAsNi45OSwzLjEzLDYuOTksNi45OVYzOS45NnoiLz4KCQk8bGluZWFyR3JhZGllbnQgaWQ9IlNWR0lEXzFfIiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgeDE9IjIzLjkyNjIiIHkxPSIwLjE4NDkiIHgyPSIyMy4yNzkyIiB5Mj0iMzIuMzIxNSI+CgkJCTxzdG9wICBvZmZzZXQ9IjIuNTEyNTYzZS0wMyIgc3R5bGU9InN0b3AtY29sb3I6IzYwMkQ4NiIvPgoJCQk8c3RvcCAgb2Zmc2V0PSIxIiBzdHlsZT0ic3RvcC1jb2xvcjojOUU4MkI1Ii8+CgkJPC9saW5lYXJHcmFkaWVudD4KCQk8cGF0aCBjbGFzcz0ic3QyIiBkPSJNNDYuOTYsMTkuNzdWNy4zNGMwLTMuODYtMy4xMy02Ljk5LTYuOTktNi45OUg3LjM1Yy0zLjg2LDAtNi45OSwzLjEzLTYuOTksNi45OXY5LjM4CgkJCWMwLDAsMi44NiwxNS41MywyMy4zMSwxNS41M0M0MS40NywzMi4yNSw0Ni45NiwxOS43Nyw0Ni45NiwxOS43N3oiLz4KCTwvZz4KCTxnPgoJCTxwYXRoIGNsYXNzPSJzdDMiIGQ9Ik0xNy40NywzNy44NWgxNS45NmMyLjc4LDAsNC42Mi0wLjQ5LDUuMjItMC44NmMwLjk5LTAuNjIsMS44NC0yLjM3LDIuNTUtMy41M2wwLjg0LDAuMjNsLTIuNTUsNy43OEg0Ljg4CgkJCXYtMC42N2MxLjUxLTAuMDQsMi4zOS0wLjI0LDIuODgtMC42N2MwLjQ5LTAuNDUsMC43My0xLjMsMC43My0yLjU2VjkuNTFjMC0xLjI2LTAuMjQtMi4xLTAuNzMtMi41NgoJCQlDNy4yNyw2LjUzLDYuMzksNi4zMyw0Ljg4LDYuMjl2LTAuN2gxNi4zMXYwLjdjLTEuNTEsMC4wMy0yLjQ5LDAuMjQtMi45OCwwLjY3Yy0wLjQ5LDAuNDYtMC43MywxLjMtMC43MywyLjU2VjM3Ljg1eiIvPgoJPC9nPgoJPGc+CgkJPGc+CgkJCTxwb2x5Z29uIGNsYXNzPSJzdDMiIHBvaW50cz0iMjMuNTQsMzAuNjEgMjUuOTEsMjkuMzkgMzAuOTEsNDEuNDIgCQkJIi8+CgkJPC9nPgoJCTxnPgoJCQk8cG9seWdvbiBjbGFzcz0ic3QzIiBwb2ludHM9IjIzLjcyLDE2Ljc0IDIxLjMsMTcuOTEgMTYuNCw1Ljc2IAkJCSIvPgoJCTwvZz4KCQk8Zz4KCQkJPHBvbHlnb24gY2xhc3M9InN0MyIgcG9pbnRzPSIzMC43NywyMy41OCAyOS4zNSwyMS4zNCA0MS40LDE2LjQ0IAkJCSIvPgoJCTwvZz4KCQk8Zz4KCQkJPHBvbHlnb24gY2xhc3M9InN0MyIgcG9pbnRzPSIxNS41LDI0LjI5IDE3Ljg2LDI1Ljk2IDUuNzMsMzAuODIgCQkJIi8+CgkJPC9nPgoJCTxnPgoJCQk8cG9seWdvbiBjbGFzcz0ic3Q0IiBwb2ludHM9IjE3Ljg2LDI1Ljk2IDIzLjYsMjMuNjUgMTMuODksNDYuOTcgCQkJIi8+CgkJPC9nPgoJCTxnPgoJCQk8cG9seWdvbiBjbGFzcz0ic3Q0IiBwb2ludHM9IjI5LjM1LDIxLjM0IDIzLjYsMjMuNjUgMzMuNTQsMC4zNyAJCQkiLz4KCQk8L2c+CgkJPGc+CgkJCTxwb2x5Z29uIGNsYXNzPSJzdDQiIHBvaW50cz0iMjUuOTEsMjkuMzkgMjMuNiwyMy42NSA0Ni44NSwzMy41MSAJCQkiLz4KCQk8L2c+CgkJPGc+CgkJCTxwb2x5Z29uIGNsYXNzPSJzdDQiIHBvaW50cz0iMjEuMywxNy45MSAyMy42LDIzLjY1IDAuMzUsMTMuNzMgCQkJIi8+CgkJPC9nPgoJPC9nPgoJPGc+CgkJPGc+CgkJCTxwb2x5Z29uIGNsYXNzPSJzdDMiIHBvaW50cz0iMjkuOTIsMTguNDggMjkuMDcsMjIuNzEgNDEuNDEsMTYuNDMgCQkJIi8+CgkJPC9nPgoJCTxnPgoJCQk8cG9seWdvbiBjbGFzcz0ic3QzIiBwb2ludHM9IjE3LjMzLDI4Ljc3IDE4LjA1LDI0Ljk1IDUuNzMsMzAuODIgCQkJIi8+CgkJPC9nPgoJCTxnPgoJCQk8cG9seWdvbiBjbGFzcz0ic3QzIiBwb2ludHM9IjI4Ljc3LDI5Ljk2IDI0LjQxLDI5IDMwLjksNDEuNDEgCQkJIi8+CgkJPC9nPgoJCTxnPgoJCQk8cG9seWdvbiBjbGFzcz0ic3QzIiBwb2ludHM9IjE4LjQ0LDE3LjM0IDIyLjMzLDE4LjEyIDE2LjQsNS43NiAJCQkiLz4KCQk8L2c+CgkJPGc+CgkJCTxwb2x5Z29uIGNsYXNzPSJzdDMiIHBvaW50cz0iMjkuMzUsMjEuMzQgMjMuNiwyMy42NSA0Ni44NiwzMy41MSAJCQkiLz4KCQk8L2c+CgkJPGc+CgkJCTxwb2x5Z29uIGNsYXNzPSJzdDMiIHBvaW50cz0iMTcuODYsMjUuOTYgMjMuNiwyMy42NSAwLjM1LDEzLjczIAkJCSIvPgoJCTwvZz4KCQk8Zz4KCQkJPHBvbHlnb24gY2xhc3M9InN0MyIgcG9pbnRzPSIyNS45MSwyOS4zOSAyMy42LDIzLjY1IDEzLjg5LDQ2Ljk2IAkJCSIvPgoJCTwvZz4KCQk8Zz4KCQkJPHBvbHlnb24gY2xhc3M9InN0MyIgcG9pbnRzPSIyMS4zLDE3LjkxIDIzLjYsMjMuNjUgMzMuNTQsMC4zNyAJCQkiLz4KCQk8L2c+Cgk8L2c+CjwvZz4KPGc+Cgk8cGF0aCBjbGFzcz0ic3QwIiBkPSJNMjE5LjI2LDQyLjk3YzAuMzMsMCwwLjY2LDAuMDksMC45NywwLjI2YzAuMzIsMC4xNywwLjU2LDAuNDEsMC43NCwwLjczYzAuMTgsMC4zMiwwLjI2LDAuNjUsMC4yNiwwLjk5CgkJYzAsMC4zNC0wLjA5LDAuNjctMC4yNiwwLjk4Yy0wLjE3LDAuMzEtMC40MiwwLjU2LTAuNzMsMC43M2MtMC4zMSwwLjE3LTAuNjQsMC4yNi0wLjk4LDAuMjZzLTAuNjctMC4wOS0wLjk4LTAuMjYKCQlzLTAuNTYtMC40Mi0wLjczLTAuNzNjLTAuMTctMC4zMS0wLjI2LTAuNjQtMC4yNi0wLjk4YzAtMC4zNCwwLjA5LTAuNjcsMC4yNy0wLjk5YzAuMTgtMC4zMiwwLjQyLTAuNTYsMC43NC0wLjczCgkJQzIxOC42LDQzLjA1LDIxOC45Myw0Mi45NywyMTkuMjYsNDIuOTd6IE0yMTkuMjYsNDMuMjljLTAuMjgsMC0wLjU1LDAuMDctMC44MSwwLjIxYy0wLjI2LDAuMTQtMC40NywwLjM1LTAuNjIsMC42MQoJCWMtMC4xNSwwLjI2LTAuMjIsMC41NC0wLjIyLDAuODNjMCwwLjI4LDAuMDcsMC41NiwwLjIyLDAuODJjMC4xNSwwLjI2LDAuMzUsMC40NiwwLjYxLDAuNjFjMC4yNiwwLjE1LDAuNTQsMC4yMiwwLjgyLDAuMjIKCQlzMC41Ni0wLjA3LDAuODItMC4yMmMwLjI2LTAuMTUsMC40Ny0wLjM1LDAuNjEtMC42MWMwLjE1LTAuMjYsMC4yMi0wLjUzLDAuMjItMC44MmMwLTAuMjktMC4wNy0wLjU2LTAuMjItMC44MwoJCWMtMC4xNS0wLjI2LTAuMzUtMC40Ny0wLjYyLTAuNjFDMjE5LjgxLDQzLjM3LDIxOS41NCw0My4yOSwyMTkuMjYsNDMuMjl6IE0yMTguMzksNDYuMDR2LTIuMTNoMC43M2MwLjI1LDAsMC40MywwLjAyLDAuNTQsMC4wNgoJCWMwLjExLDAuMDQsMC4yLDAuMTEsMC4yNywwLjIxczAuMSwwLjIsMC4xLDAuMzFjMCwwLjE2LTAuMDYsMC4yOS0wLjE3LDAuNDFjLTAuMTEsMC4xMi0wLjI2LDAuMTgtMC40NCwwLjE5CgkJYzAuMDgsMC4wMywwLjE0LDAuMDcsMC4xOCwwLjExYzAuMDksMC4wOCwwLjE5LDAuMjIsMC4zMSwwLjQybDAuMjYsMC40MmgtMC40MmwtMC4xOS0wLjM0Yy0wLjE1LTAuMjYtMC4yNy0wLjQzLTAuMzYtMC41CgkJYy0wLjA2LTAuMDUtMC4xNS0wLjA3LTAuMjgtMC4wN2gtMC4ydjAuOUgyMTguMzl6IE0yMTguNzQsNDQuODRoMC40MmMwLjIsMCwwLjMzLTAuMDMsMC40MS0wLjA5YzAuMDctMC4wNiwwLjExLTAuMTQsMC4xMS0wLjI0CgkJYzAtMC4wNi0wLjAyLTAuMTItMC4wNS0wLjE3cy0wLjA4LTAuMDktMC4xNS0wLjExYy0wLjA2LTAuMDItMC4xOC0wLjA0LTAuMzQtMC4wNGgtMC4zOVY0NC44NHoiLz4KPC9nPgo8L3N2Zz4K",
+  fLogo:    "data:image/png;base64,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",
+  arrowUp:  "data:image/png;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADb/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCAAPAA8DASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAABgX/xAAjEAABBAAGAwEBAAAAAAAAAAABAgMEBQYHCBESMQATIUNR/8QAFAEBAAAAAAAAAAAAAAAAAAAAAP/EABQRAQAAAAAAAAAAAAAAAAAAAAD/2gAMAwEAAhEDEQA/ACml7JCkEvD+Mc1UNtxrmSGcO0b6N1WK+JX7XEH8gkFQB+K+b/CkLiakslauAqwx1lY4LLDLVg7Cs4DAKnaqUhzgpHHv1lXX83HaSD4Z0zX9tZ6hMvm7i2mzWYEgRIaZDynAw3wWEtoB34p3PQ+eGc17u2h5m4/roNpMjwJ+IJapUdp5SG3+Elwo5pB2VsTuN+j4H//Z",
+  langIco:  "data:image/png;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADb/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCAAQACADASIAAhEBAxEB/8QAGAABAAMBAAAAAAAAAAAAAAAABQECBAf/xAAoEAABBAIBBAEDBQAAAAAAAAABAgMEBQYRBwASIUEIExRyFTFhcYH/xAAUAQEAAAAAAAAAAAAAAAAAAAAA/8QAFBEBAAAAAAAAAAAAAAAAAAAAAP/aAAwDAQACEQMRAD8A758heQrHjbDq04vVxLC+s57VfWQXUq+mfBKiUpIPalKdeCNEjqJGWsZ38YLPLY6UIFli0t1xtB2G3ft1pcQPxWFJ/wA6P5Y4lmcm8k45ey8nk12N09e6Y36VKUzM+7dUNuJcCSkIKAjyDvwfR6Mxnju04v4A5FxeTaM2FUI9pIpyCousxlsKIbcJAHdsEnXjaj/QBRjOLPCeGsEk1+E3WTJfoIxdXAKAiKER2tFwqI0Fdx1+J/jrHwnzHd55kEnCsn4+saq6gR93LgSkxI5WCW0KBUVDvT+wO/frpN/FrDNvi3UYpWSK+PIs8cgMF2cwXW0ILTXcrtBB7gkEpPpQB6t8e+MJnElNfVk68g2sOTMEtqcY5akqHZpf11FRB1rx58DZ96Af/9k=",
+  infoIco:  "data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyBpZD0iTGF5ZXJfMiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB2aWV3Qm94PSIwIDAgNTYuMDQgNTYuMDQiPgogIDxkZWZzPgogICAgPHN0eWxlPgogICAgICAuY2xzLTEgewogICAgICAgIGZpbGw6ICNmZmY7CiAgICAgIH0KCiAgICAgIC5jbHMtMiB7CiAgICAgICAgZmlsbDogIzMzNTJhMzsKICAgICAgfQogICAgPC9zdHlsZT4KICA8L2RlZnM+CiAgPGNpcmNsZSBjbGFzcz0iY2xzLTEiIGN4PSIyOC4wMiIgY3k9IjI4LjAyIiByPSIyNC43Ii8+CiAgPGc+CiAgICA8cGF0aCBjbGFzcz0iY2xzLTEiIGQ9Ik0yOC4wMiw1NC42MWMxNC42OCwwLDI2LjU5LTExLjkxLDI2LjU5LTI2LjU5UzQyLjcsMS40MywyOC4wMiwxLjQzLDEuNDMsMTMuMzQsMS40MywyOC4wMnMxMS45MSwyNi41OSwyNi41OSwyNi41OSIvPgogICAgPHBhdGggY2xhc3M9ImNscy0yIiBkPSJNNTIuMTMsMjguMDJjMC0xMy4zLTEwLjgxLTI0LjExLTI0LjExLTI0LjExUzMuOTEsMTQuNzIsMy45MSwyOC4wMnMxMC44MSwyNC4xMSwyNC4xMSwyNC4xMSwyNC4xMS0xMC44MSwyNC4xMS0yNC4xMU01Ni4wNCwyOC4wMmMwLDE1LjQ1LTEyLjU3LDI4LjAyLTI4LjAyLDI4LjAyUzAsNDMuNDcsMCwyOC4wMiwxMi41NywwLDI4LjAyLDBzMjguMDIsMTIuNTcsMjguMDIsMjguMDJNMjguMDIsMTQuOTljLTEuNDQsMC0yLjYsMS4xNy0yLjYsMi42czEuMTcsMi42MSwyLjYsMi42MSwyLjYxLTEuMTcsMi42MS0yLjYxLTEuMTctMi42LTIuNjEtMi42TTI5Ljk3LDI4LjAydjEzLjAzYzAsMS4wOC0uODcsMS45Ni0xLjk2LDEuOTZzLTEuOTUtLjg4LTEuOTUtMS45NnYtMTMuMDNjMC0xLjA4Ljg3LTEuOTYsMS45NS0xLjk2czEuOTYuODgsMS45NiwxLjk2Ii8+CiAgPC9nPgo8L3N2Zz4K"
+};
+
+/*
+ * ╔══════════════════════════════════════════════════════════╗
+ * ║   ENTRA NATIVE AUTHENTICATION API — CONFIG               ║
+ * ║   Docs: https://learn.microsoft.com/en-us/entra/         ║
+ * ║         identity-platform/reference-native-auth-api      ║
+ * ╠══════════════════════════════════════════════════════════╣
+ * ║  ⚠ Native Auth API has NO CORS support.                  ║
+ * ║  Set PROXY to your proxy URL (run proxy-server.js).      ║
+ * ║  Example: const PROXY = "http://localhost:3001/proxy";   ║
+ * ╚══════════════════════════════════════════════════════════╝
+ */
+window.NA_CONFIG = {
+  CLIENT_ID  : "d1141f25-2729-4ea5-9892-f80db4205ebf",
+  TENANT_ID  : "36090fda-8a83-4040-8c58-7cf784511505",
+  TENANT_SUB : "birlasoftdentalentra",
+  PROXY      : "https://issuing-unloaded-willfully.ngrok-free.dev/proxy",   // ← set to "http://localhost:3001/proxy" after starting proxy-server.js
+  SCOPES     : "openid profile email",
+  CHAL_TYPES : "oob password redirect"
 };
 </script>
 
-<script type="text/babel">
-const { useState, useEffect, useCallback, useRef } = React;
+<script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
-/* ════════════════════════════════════════════
-   MSAL CONFIGURATION — Azure AD CIAM
-   Tenant: birlasoftdentalentra
-   ════════════════════════════════════════════ */
-const CLIENT_ID    = "d1141f25-2729-4ea5-9892-f80db4205ebf";
-const TENANT_ID    = "36090fda-8a83-4040-8c58-7cf784511505";
-const AUTHORITY    = `https://birlasoftdentalentra.ciamlogin.com/${TENANT_ID}`;
-const REDIRECT_URI = window.location.origin + window.location.pathname;
+<script type="text/babel" data-presets="react">
 
-const MSAL_CONFIG = {
-  auth: {
-    clientId:               CLIENT_ID,
-    authority:              AUTHORITY,
-    redirectUri:            REDIRECT_URI,
-    postLogoutRedirectUri:  REDIRECT_URI,
-    navigateToLoginRequestUrl: true,
-  },
-  cache: {
-    cacheLocation: "sessionStorage",
-    storeAuthStateInCookie: false,
-  },
-  system: {
-    loggerOptions: {
-      loggerCallback: (level, msg, containsPii) => {
-        if (!containsPii && level === msal.LogLevel.Error) console.error("[MSAL]", msg);
-      },
-    },
-  },
-};
+/* ──────────────────────────────────────────────────────────
+   NATIVE AUTH API CLIENT
+   All raw HTTP calls per the MS Entra Native Auth API spec.
+────────────────────────────────────────────────────────── */
+const { CLIENT_ID, TENANT_ID, TENANT_SUB, PROXY, SCOPES, CHAL_TYPES } = window.NA_CONFIG;
+const BASE = `https://${TENANT_SUB}.ciamlogin.com/${TENANT_ID}`;
 
-const SCOPES = { scopes: ["openid", "profile", "email"] };
-
-let _msalInstance = null;
-async function getMsal() {
-  if (!_msalInstance) {
-    _msalInstance = new msal.PublicClientApplication(MSAL_CONFIG);
-    await _msalInstance.initialize();
+async function naPost(path, params) {
+  const url  = PROXY ? (PROXY + path) : (BASE + path);
+  const body = new URLSearchParams({ client_id: CLIENT_ID, ...params });
+  let res;
+  try {
+    res = await fetch(url, {
+      method : "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body   : body.toString(),
+    });
+  } catch (e) {
+    throw { code: "network_error", desc: PROXY
+      ? "Network error. Check proxy-server.js is running."
+      : "Native Auth API blocks CORS. Set PROXY in window.NA_CONFIG and start proxy-server.js." };
   }
-  return _msalInstance;
+  const json = await res.json();
+  if (json.error && json.error !== "attributes_required" && json.error !== "credential_required") {
+    throw { code: json.error, desc: (json.error_description||"").split("\r\n")[0], sub: json.suberror, raw: json };
+  }
+  return json;
 }
 
-/* ════════════════════════════════════════════
+/* SIGN-IN */
+const SI = {
+  initiate  : (username)                  => naPost("/oauth2/v2.0/initiate",
+    { username, challenge_type: CHAL_TYPES }),
+  challenge : (continuation_token)        => naPost("/oauth2/v2.0/challenge",
+    { continuation_token, challenge_type: CHAL_TYPES }),
+  tokenPw   : (continuation_token, password) => naPost("/oauth2/v2.0/token",
+    { continuation_token, password, grant_type: "password", scope: SCOPES }),
+  tokenOTP  : (continuation_token, oob)   => naPost("/oauth2/v2.0/token",
+    { continuation_token, oob, grant_type: "urn:ietf:params:oauth:grant-type:oob", scope: SCOPES }),
+};
+
+/* SIGN-UP */
+const SU = {
+  start     : (username, password, displayName) => naPost("/signup/v1.0/start", {
+    username, challenge_type: CHAL_TYPES,
+    ...(password ? { password } : {}),
+    ...(displayName ? { attributes: JSON.stringify({ displayName }) } : {}),
+  }),
+  challenge : (continuation_token) => naPost("/signup/v1.0/challenge",
+    { continuation_token, challenge_type: CHAL_TYPES }),
+  contOTP   : (continuation_token, oob)      => naPost("/signup/v1.0/continue",
+    { continuation_token, oob, grant_type: "oob" }),
+  contPw    : (continuation_token, password) => naPost("/signup/v1.0/continue",
+    { continuation_token, password, grant_type: "password" }),
+  token     : (continuation_token)           => naPost("/oauth2/v2.0/token",
+    { continuation_token, grant_type: "urn:ietf:params:oauth:grant-type:jwt-bearer", scope: SCOPES }),
+};
+
+/* SSPR */
+const PR = {
+  start     : (username)                      => naPost("/resetpassword/v1.0/start",
+    { username, challenge_type: CHAL_TYPES }),
+  challenge : (continuation_token)            => naPost("/resetpassword/v1.0/challenge",
+    { continuation_token, challenge_type: CHAL_TYPES }),
+  contOTP   : (continuation_token, oob)       => naPost("/resetpassword/v1.0/continue",
+    { continuation_token, oob, grant_type: "oob" }),
+  submit    : (continuation_token, new_password) => naPost("/resetpassword/v1.0/submit",
+    { continuation_token, new_password }),
+  poll      : (continuation_token)            => naPost("/resetpassword/v1.0/poll_completion",
+    { continuation_token }),
+};
+
+/* JWT decode (display only – no signature verify) */
+function jwtDecode(t) {
+  try { return JSON.parse(atob(t.split(".")[1].replace(/-/g,"+").replace(/_/g,"/"))); }
+  catch { return {}; }
+}
+
+/* Password strength 0-4 */
+function pwStr(p) {
+  if (!p) return 0;
+  return Math.min(4,
+    (p.length >= 8 ? 1 : 0) +
+    (p.length >= 12 ? 1 : 0) +
+    (/[A-Z]/.test(p) && /[a-z]/.test(p) ? 1 : 0) +
+    (/[^A-Za-z0-9]/.test(p) ? 1 : 0));
+}
+const STR_LBL = ["","Weak","Fair","Good","Strong"];
+const STR_CLS = ["","lv1","lv2","lv3","lv4"];
+
+/* ──────────────────────────────────────────────────────────
+   HOOKS
+────────────────────────────────────────────────────────── */
+const { useState, useCallback, useRef, useEffect } = React;
+
+/* ──────────────────────────────────────────────────────────
    SMALL SHARED COMPONENTS
-   ════════════════════════════════════════════ */
+────────────────────────────────────────────────────────── */
+function Spin() { return <span className="spin" aria-hidden="true" />; }
 
-function Spinner() { return <span className="spinner" aria-hidden="true" />; }
-
-function ErrBox({ msg }) {
-  if (!msg) return null;
+function ErrBox({ e }) {
+  if (!e) return null;
+  const text = typeof e === "string" ? e : (e.desc || "An error occurred.");
+  const hints = {
+    network_error       : null,
+    nativeauthapi_disabled : "Go to Azure Portal → App Registrations → Authentication → Enable native auth.",
+    user_already_exists : "Account exists. Please sign in instead.",
+    invalid_oob_value   : "Incorrect code — please try again.",
+    password_too_weak   : "Password is too weak. Use uppercase, numbers and symbols.",
+    password_too_short  : "Password must be at least 8 characters.",
+  };
+  const hint = e && e.code ? hints[e.code] : undefined;
   return (
-    <div className="err-box" role="alert">
+    <div className="m-err" role="alert">
       <i className="fa-solid fa-circle-exclamation" />
-      <span>{msg}</span>
+      <div>
+        <div>{text}</div>
+        {hint && <div style={{marginTop:4,fontWeight:700,fontSize:12}}>{hint}</div>}
+      </div>
     </div>
   );
 }
 
-function MSButton({ onClick, disabled, loading, label }) {
+/* Step indicator */
+function Steps({ list, cur }) {
   return (
-    <button className="btn-ms" onClick={onClick} disabled={disabled || loading} aria-busy={loading}>
-      {loading ? <Spinner /> : (
-        <svg className="ms-icon" viewBox="0 0 21 21" aria-hidden="true">
-          <rect x="1"  y="1"  width="9" height="9" fill="#f25022"/>
-          <rect x="11" y="1"  width="9" height="9" fill="#7fba00"/>
-          <rect x="1"  y="11" width="9" height="9" fill="#00a4ef"/>
-          <rect x="11" y="11" width="9" height="9" fill="#ffb900"/>
-        </svg>
-      )}
-      {label}
-    </button>
+    <div className="steps-row">
+      {list.map((label, i) => {
+        const cls = i < cur ? "s-done" : i === cur ? "s-act" : "s-idle";
+        return (
+          <div key={label} className={`step-item ${cls}`}>
+            <div className="step-dot">
+              {i < cur ? <i className="fa-solid fa-check" style={{fontSize:9}} /> : i + 1}
+            </div>
+            <div className="step-lbl">{label}</div>
+          </div>
+        );
+      })}
+    </div>
   );
 }
 
-/* ════════════════════════════════════════════
-   TOP BAR
-   ════════════════════════════════════════════ */
-function TopBar() {
-  const [sz, setSz] = useState(100);
-  const change = (d) => {
-    setSz(p => {
-      const n = d === 0 ? 100 : Math.min(130, Math.max(85, p + d * 5));
-      document.documentElement.style.fontSize = n + "%";
-      return n;
-    });
-  };
+/* OTP digit-box input — CORRECT: single useRef holding array */
+function OTPInput({ len = 8, value, onChange, autoFocus }) {
+  const refsArr = useRef([]);
+
+  const digits = (value || "").padEnd(len, " ").split("").slice(0, len);
+
+  function handleChange(i, ev) {
+    const ch = ev.target.value.replace(/[^0-9]/g, "").slice(-1);
+    const next = [...digits];
+    next[i] = ch || " ";
+    onChange(next.join("").trimEnd());
+    if (ch && i < len - 1) refsArr.current[i + 1] && refsArr.current[i + 1].focus();
+  }
+
+  function handleKey(i, ev) {
+    if (ev.key === "Backspace") {
+      const next = [...digits];
+      if (next[i].trim()) { next[i] = " "; onChange(next.join("").trimEnd()); }
+      else if (i > 0)     { refsArr.current[i - 1] && refsArr.current[i - 1].focus(); }
+    }
+    if (ev.key === "ArrowLeft"  && i > 0)     refsArr.current[i - 1] && refsArr.current[i - 1].focus();
+    if (ev.key === "ArrowRight" && i < len-1) refsArr.current[i + 1] && refsArr.current[i + 1].focus();
+  }
+
+  function handlePaste(ev) {
+    ev.preventDefault();
+    const paste = ev.clipboardData.getData("text").replace(/[^0-9]/g, "").slice(0, len);
+    onChange(paste);
+    const fi = Math.min(paste.length, len - 1);
+    refsArr.current[fi] && refsArr.current[fi].focus();
+  }
+
   return (
-    <div className="top-bar">
-      <div className="tb-inner">
-        <span className="tb-fontlabel">Text Size</span>
-        <button className="tb-btn" onClick={() => change(-1)} title="Decrease text size" aria-label="Decrease text size">−</button>
-        <button className="tb-btn" onClick={() => change(0)}  title="Reset text size"    aria-label="Reset text size">↺</button>
-        <button className="tb-btn" onClick={() => change(1)}  title="Increase text size" aria-label="Increase text size">+</button>
-        <span className="tb-sep">|</span>
-        <div className="lang-wrap" title="Language: English">
-          <img src={window.ASSETS.langIcon} alt="" className="lang-icon" aria-hidden="true" />
-          <span>English</span>
+    <div className="otp-wrap" role="group" aria-label="One-time passcode">
+      {digits.map((d, i) => (
+        <input
+          key={i}
+          ref={el => { refsArr.current[i] = el; }}
+          type="text"
+          inputMode="numeric"
+          maxLength={1}
+          className={"otp-box" + (d.trim() ? " filled" : "")}
+          value={d.trim()}
+          autoFocus={autoFocus && i === 0}
+          onChange={ev => handleChange(i, ev)}
+          onKeyDown={ev => handleKey(i, ev)}
+          onPaste={handlePaste}
+          aria-label={"Digit " + (i + 1)}
+        />
+      ))}
+    </div>
+  );
+}
+
+/* Countdown/resend */
+function ResendTimer({ interval, onResend, busy }) {
+  const [secs, setSecs] = useState(interval || 60);
+  useEffect(() => {
+    if (secs <= 0) return;
+    const t = setTimeout(() => setSecs(s => s - 1), 1000);
+    return () => clearTimeout(t);
+  }, [secs]);
+  const doResend = () => { setSecs(interval || 60); onResend(); };
+  return (
+    <div className="otp-resend">
+      {secs > 0
+        ? <span>Resend code in <strong>{secs}s</strong></span>
+        : <button className="btn-ghost" onClick={doResend} disabled={busy}>
+            <i className="fa-solid fa-rotate-right" style={{marginRight:4}} />Resend Code
+          </button>
+      }
+    </div>
+  );
+}
+
+/* Password field + optional strength meter */
+function PwField({ id, label, value, onChange, meter, ph, complete }) {
+  const [vis, setVis] = useState(false);
+  const s = meter ? pwStr(value) : 0;
+  return (
+    <div className="fg">
+      <label htmlFor={id}>{label}</label>
+      <div className="pw-wrap">
+        <input id={id} type={vis ? "text" : "password"} value={value}
+          placeholder={ph || ""} autoComplete={complete || "current-password"}
+          onChange={ev => onChange(ev.target.value)} />
+        <button className="pw-toggle" type="button"
+          onClick={() => setVis(v => !v)} aria-label={vis ? "Hide" : "Show"}>
+          <i className={"fa-solid fa-eye" + (vis ? "-slash" : "")} />
+        </button>
+      </div>
+      {meter && value && (
+        <div className="pw-str">
+          <div className="str-bars">
+            {[1,2,3,4].map(n => (
+              <div key={n} className={"str-bar" + (s >= n ? " " + STR_CLS[s] : "")} />
+            ))}
+          </div>
+          <div className="str-lbl">{STR_LBL[s]}</div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ──────────────────────────────────────────────────────────
+   SIGN-IN FLOW
+   step 0: email  →  step 1: password -or- OTP
+────────────────────────────────────────────────────────── */
+function SignInFlow({ onAuth, onGo }) {
+  const [step,    setStep]  = useState(0);
+  const [email,   setEmail] = useState("");
+  const [token,   setToken] = useState("");
+  const [chal,    setChal]  = useState("");
+  const [target,  setTgt]   = useState("");
+  const [clen,    setClen]  = useState(8);
+  const [ivl,     setIvl]   = useState(60);
+  const [otp,     setOtp]   = useState("");
+  const [pw,      setPw]    = useState("");
+  const [busy,    setBusy]  = useState(false);
+  const [err,     setErr]   = useState(null);
+
+  async function goStep1() {
+    setErr(null);
+    if (!email.includes("@")) { setErr("Enter a valid email address."); return; }
+    setBusy(true);
+    try {
+      const r1 = await SI.initiate(email.trim());
+      if (r1.challenge_type === "redirect") { setErr("Tenant requires browser-based login."); return; }
+      const r2 = await SI.challenge(r1.continuation_token);
+      setToken(r2.continuation_token);
+      setChal(r2.challenge_type);
+      setTgt(r2.challenge_target_label || email);
+      if (r2.code_length) setClen(r2.code_length);
+      if (r2.interval)    setIvl(r2.interval);
+      setStep(1);
+    } catch (e) { setErr(e); }
+    finally { setBusy(false); }
+  }
+
+  async function resend() {
+    setBusy(true);
+    try { const r = await SI.challenge(token); setToken(r.continuation_token); }
+    catch (e) { setErr(e); }
+    finally { setBusy(false); }
+  }
+
+  async function submit() {
+    setErr(null);
+    setBusy(true);
+    try {
+      const res = chal === "password"
+        ? await SI.tokenPw(token, pw)
+        : await SI.tokenOTP(token, otp.trim());
+      onAuth({ idToken: res.id_token, accessToken: res.access_token, claims: jwtDecode(res.id_token) });
+    } catch (e) { setErr(e); }
+    finally { setBusy(false); }
+  }
+
+  const canSubmit = chal === "password" ? !!pw : otp.trim().length >= clen;
+
+  return (
+    <div className="acard">
+      <div className="acard-head"><i className="fa-solid fa-shield-halved" />Member Login</div>
+      <div className="acard-body">
+        <Steps list={["Your Email", "Verification"]} cur={step} />
+        <ErrBox e={err} />
+
+        {step === 0 && (
+          <>
+            <div className="fg">
+              <label htmlFor="si-em">Email Address</label>
+              <input id="si-em" type="email" placeholder="your@email.com"
+                value={email} onChange={ev => setEmail(ev.target.value)}
+                onKeyDown={ev => ev.key === "Enter" && goStep1()} autoFocus />
+            </div>
+            <button className="btn-prim" onClick={goStep1} disabled={busy}>
+              {busy && <Spin />}{busy ? "Checking…" : "Continue"}
+            </button>
+            <div className="link-row">
+              <span className="lnk" onClick={() => onGo("resetpw")}>Forgot Password?</span>
+              <span className="lnk" onClick={() => onGo("forgotuser")}>Forgot Username?</span>
+            </div>
+            <div className="dvdr">New Member?</div>
+            <button className="btn-sec" onClick={() => onGo("register")}>Register Now</button>
+          </>
+        )}
+
+        {step === 1 && chal === "password" && (
+          <>
+            <div className="m-info"><i className="fa-solid fa-user" /> Signing in as <strong>{email}</strong></div>
+            <PwField id="si-pw" label="Password" value={pw} onChange={setPw} ph="Your password" />
+            <button className="btn-prim" onClick={submit} disabled={busy || !pw}>
+              {busy && <Spin />}{busy ? "Signing in…" : "Login"}
+            </button>
+            <button className="btn-back" style={{marginTop:10}}
+              onClick={() => { setStep(0); setErr(null); setPw(""); }}>
+              <i className="fa-solid fa-arrow-left" />Back
+            </button>
+          </>
+        )}
+
+        {step === 1 && chal === "oob" && (
+          <>
+            <p className="otp-hint">
+              We sent a <strong>{clen}-digit code</strong> to<br />
+              <span className="otp-target">{target}</span>
+            </p>
+            <OTPInput len={clen} value={otp} onChange={setOtp} autoFocus />
+            <button className="btn-prim" onClick={submit} disabled={busy || !canSubmit}>
+              {busy && <Spin />}{busy ? "Verifying…" : "Verify & Sign In"}
+            </button>
+            <ResendTimer interval={ivl} onResend={resend} busy={busy} />
+            <button className="btn-back" style={{marginTop:10}}
+              onClick={() => { setStep(0); setOtp(""); setErr(null); }}>
+              <i className="fa-solid fa-arrow-left" />Back
+            </button>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ──────────────────────────────────────────────────────────
+   REGISTER FLOW
+   step 0: details  →  step 1: verify OTP  →  step 2: success
+────────────────────────────────────────────────────────── */
+function RegisterFlow({ onBack, onAuth }) {
+  const [step,  setStep]  = useState(0);
+  const [name,  setName]  = useState("");
+  const [email, setEmail] = useState("");
+  const [pw,    setPw]    = useState("");
+  const [pwc,   setPwc]   = useState("");
+  const [tok,   setTok]   = useState("");
+  const [otp,   setOtp]   = useState("");
+  const [clen,  setClen]  = useState(8);
+  const [tgt,   setTgt]   = useState("");
+  const [ivl,   setIvl]   = useState(60);
+  const [busy,  setBusy]  = useState(false);
+  const [err,   setErr]   = useState(null);
+
+  async function startReg() {
+    setErr(null);
+    if (!name.trim())           { setErr("Please enter your full name."); return; }
+    if (!email.includes("@"))   { setErr("Enter a valid email address."); return; }
+    if (pw.length < 8)          { setErr("Password must be at least 8 characters."); return; }
+    if (pw !== pwc)             { setErr("Passwords do not match."); return; }
+    setBusy(true);
+    try {
+      const r1 = await SU.start(email.trim(), pw, name.trim());
+      const r2 = await SU.challenge(r1.continuation_token);
+      setTok(r2.continuation_token);
+      setTgt(r2.challenge_target_label || email);
+      if (r2.code_length) setClen(r2.code_length);
+      if (r2.interval)    setIvl(r2.interval);
+      setStep(1);
+    } catch (e) {
+      setErr(e.code === "user_already_exists"
+        ? { code:"user_already_exists", desc:"This email is already registered." }
+        : e);
+    }
+    finally { setBusy(false); }
+  }
+
+  async function resend() {
+    setBusy(true);
+    try { const r = await SU.challenge(tok); setTok(r.continuation_token); }
+    catch (e) { setErr(e); }
+    finally { setBusy(false); }
+  }
+
+  async function verifyOTP() {
+    setErr(null);
+    if (otp.trim().length < clen) { setErr("Please enter the full code."); return; }
+    setBusy(true);
+    try {
+      const r1 = await SU.contOTP(tok, otp.trim());
+      const finalTok = r1.continuation_token || tok;
+      // Try to auto sign-in
+      try {
+        const res = await SU.token(finalTok);
+        onAuth({ idToken: res.id_token, accessToken: res.access_token, claims: jwtDecode(res.id_token) });
+      } catch {
+        setStep(2); // account created, let them sign in manually
+      }
+    } catch (e) { setErr(e); }
+    finally { setBusy(false); }
+  }
+
+  return (
+    <div className="acard">
+      <div className="acard-head"><i className="fa-solid fa-user-plus" />New Member Registration</div>
+      <div className="acard-body">
+        {step < 2 && <Steps list={["Your Details","Verify Email","Done"]} cur={step} />}
+        {step < 2 && (
+          <button className="btn-back"
+            onClick={() => { setErr(null); step === 0 ? onBack() : setStep(s => s - 1); }}>
+            <i className="fa-solid fa-arrow-left" />{step === 0 ? "Back to Sign In" : "Back"}
+          </button>
+        )}
+        <ErrBox e={err} />
+
+        {step === 0 && (
+          <>
+            <div className="fg">
+              <label htmlFor="ru-name">Full Name *</label>
+              <input id="ru-name" type="text" placeholder="Your full name"
+                value={name} onChange={ev => setName(ev.target.value)} autoFocus />
+            </div>
+            <div className="fg">
+              <label htmlFor="ru-em">Email Address *</label>
+              <input id="ru-em" type="email" placeholder="your@email.com"
+                value={email} onChange={ev => setEmail(ev.target.value)} autoComplete="username" />
+            </div>
+            <PwField id="ru-pw"  label="Create Password *"  value={pw}  onChange={setPw}  meter ph="Min. 8 characters" complete="new-password" />
+            <PwField id="ru-pwc" label="Confirm Password *" value={pwc} onChange={setPwc} ph="Repeat password" complete="new-password" />
+            <button className="btn-prim" onClick={startReg} disabled={busy}>
+              {busy && <Spin />}{busy ? "Creating Account…" : "Create Account"}
+            </button>
+          </>
+        )}
+
+        {step === 1 && (
+          <>
+            <p className="otp-hint">
+              Check your inbox — we sent a <strong>{clen}-digit code</strong> to<br />
+              <span className="otp-target">{tgt}</span>
+            </p>
+            <OTPInput len={clen} value={otp} onChange={setOtp} autoFocus />
+            <button className="btn-prim" onClick={verifyOTP} disabled={busy || otp.trim().length < clen}>
+              {busy && <Spin />}{busy ? "Verifying…" : "Verify Email"}
+            </button>
+            <ResendTimer interval={ivl} onResend={resend} busy={busy} />
+          </>
+        )}
+
+        {step === 2 && (
+          <div className="m-ok">
+            <div style={{fontSize:40,marginBottom:10}}>🎉</div>
+            <strong>Account Created!</strong><br />
+            Welcome, {name}! Your account is ready.<br /><br />
+            <button className="btn-prim" onClick={onBack}>Sign In Now</button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ──────────────────────────────────────────────────────────
+   RESET PASSWORD (SSPR) FLOW
+   step 0: email  → 1: OTP  → 2: new pw  → 3: done
+────────────────────────────────────────────────────────── */
+function ResetPwFlow({ onBack }) {
+  const [step,    setStep]  = useState(0);
+  const [email,   setEmail] = useState("");
+  const [tok,     setTok]   = useState("");
+  const [otp,     setOtp]   = useState("");
+  const [clen,    setClen]  = useState(8);
+  const [tgt,     setTgt]   = useState("");
+  const [ivl,     setIvl]   = useState(60);
+  const [pw,      setPw]    = useState("");
+  const [pwc,     setPwc]   = useState("");
+  const [busy,    setBusy]  = useState(false);
+  const [polling, setPoll]  = useState(false);
+  const [err,     setErr]   = useState(null);
+
+  async function startReset() {
+    setErr(null);
+    if (!email.includes("@")) { setErr("Enter a valid email address."); return; }
+    setBusy(true);
+    try {
+      const r1 = await PR.start(email.trim());
+      const r2 = await PR.challenge(r1.continuation_token);
+      setTok(r2.continuation_token);
+      setTgt(r2.challenge_target_label || email);
+      if (r2.code_length) setClen(r2.code_length);
+      if (r2.interval)    setIvl(r2.interval);
+      setStep(1);
+    } catch (e) { setErr(e); }
+    finally { setBusy(false); }
+  }
+
+  async function resend() {
+    setBusy(true);
+    try { const r = await PR.challenge(tok); setTok(r.continuation_token); }
+    catch (e) { setErr(e); }
+    finally { setBusy(false); }
+  }
+
+  async function verifyOTP() {
+    setErr(null);
+    if (otp.trim().length < clen) { setErr("Enter the full code."); return; }
+    setBusy(true);
+    try {
+      const r = await PR.contOTP(tok, otp.trim());
+      setTok(r.continuation_token);
+      setStep(2);
+    } catch (e) { setErr(e); }
+    finally { setBusy(false); }
+  }
+
+  async function submitPw() {
+    setErr(null);
+    if (pw.length < 8) { setErr("Password must be at least 8 characters."); return; }
+    if (pw !== pwc)    { setErr("Passwords do not match."); return; }
+    setBusy(true);
+    try {
+      const r = await PR.submit(tok, pw);
+      let pTok = r.continuation_token || tok;
+      setPoll(true);
+      for (let i = 0; i < 12; i++) {
+        await new Promise(res => setTimeout(res, 1500));
+        const p = await PR.poll(pTok);
+        if (p.status === "succeeded" || p.poll_interval === 0) break;
+        if (p.continuation_token) pTok = p.continuation_token;
+      }
+      setPoll(false);
+      setStep(3);
+    } catch (e) { setPoll(false); setErr(e); }
+    finally { setBusy(false); }
+  }
+
+  return (
+    <div className="acard">
+      <div className="acard-head"><i className="fa-solid fa-key" />Reset Password</div>
+      <div className="acard-body">
+        {step < 3 && <Steps list={["Email","Verify OTP","New Password","Done"]} cur={step} />}
+        {step < 3 && (
+          <button className="btn-back"
+            onClick={() => { setErr(null); step === 0 ? onBack() : setStep(s => s - 1); }}>
+            <i className="fa-solid fa-arrow-left" />{step === 0 ? "Back to Sign In" : "Back"}
+          </button>
+        )}
+        <ErrBox e={err} />
+
+        {step === 0 && (
+          <>
+            <p style={{fontSize:14,color:"#555",lineHeight:1.7,marginBottom:13}}>
+              Enter your registered email. We'll send a one-time code to reset your password.
+            </p>
+            <div className="fg">
+              <label htmlFor="rp-em">Email Address</label>
+              <input id="rp-em" type="email" placeholder="your@email.com"
+                value={email} onChange={ev => setEmail(ev.target.value)}
+                onKeyDown={ev => ev.key === "Enter" && startReset()} autoFocus />
+            </div>
+            <button className="btn-prim" onClick={startReset} disabled={busy}>
+              {busy && <Spin />}{busy ? "Sending…" : "Send Reset Code"}
+            </button>
+          </>
+        )}
+
+        {step === 1 && (
+          <>
+            <p className="otp-hint">
+              Enter the <strong>{clen}-digit code</strong> sent to<br />
+              <span className="otp-target">{tgt}</span>
+            </p>
+            <OTPInput len={clen} value={otp} onChange={setOtp} autoFocus />
+            <button className="btn-prim" onClick={verifyOTP} disabled={busy || otp.trim().length < clen}>
+              {busy && <Spin />}{busy ? "Verifying…" : "Verify Code"}
+            </button>
+            <ResendTimer interval={ivl} onResend={resend} busy={busy} />
+          </>
+        )}
+
+        {step === 2 && (
+          <>
+            <div className="m-info"><i className="fa-solid fa-circle-check" />Identity confirmed. Create your new password.</div>
+            <PwField id="np-pw"  label="New Password"         value={pw}  onChange={setPw}  meter ph="Min. 8 characters" complete="new-password" />
+            <PwField id="np-pwc" label="Confirm New Password" value={pwc} onChange={setPwc} ph="Repeat password"         complete="new-password" />
+            <button className="btn-prim" onClick={submitPw} disabled={busy || polling}>
+              {(busy || polling) && <Spin />}
+              {polling ? "Applying…" : busy ? "Saving…" : "Reset Password"}
+            </button>
+          </>
+        )}
+
+        {step === 3 && (
+          <div className="m-ok">
+            <div style={{fontSize:40,marginBottom:10}}>✅</div>
+            <strong>Password Reset Successfully!</strong><br />
+            You can now sign in with your new password.<br /><br />
+            <button className="btn-prim" onClick={onBack}>Sign In Now</button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ──────────────────────────────────────────────────────────
+   FORGOT USERNAME
+────────────────────────────────────────────────────────── */
+function ForgotUserFlow({ onBack }) {
+  const [email, setEmail] = useState("");
+  const [done,  setDone]  = useState(false);
+  return (
+    <div className="acard">
+      <div className="acard-head"><i className="fa-solid fa-magnifying-glass" />Forgot Username?</div>
+      <div className="acard-body">
+        <button className="btn-back" onClick={onBack}>
+          <i className="fa-solid fa-arrow-left" />Back to Sign In
+        </button>
+        <div className="m-info">
+          <i className="fa-solid fa-circle-info" /> In this portal your <strong>email address is your username</strong>.
+          Enter your email to continue.
+        </div>
+        {!done ? (
+          <>
+            <div className="fg">
+              <label htmlFor="fu-em">Registered Email Address</label>
+              <input id="fu-em" type="email" placeholder="your@email.com"
+                value={email} onChange={ev => setEmail(ev.target.value)} autoFocus />
+            </div>
+            <button className="btn-prim" onClick={() => setDone(true)} disabled={!email.includes("@")}>
+              <i className="fa-solid fa-arrow-right" />Find My Account
+            </button>
+          </>
+        ) : (
+          <div className="m-ok">
+            <i className="fa-solid fa-circle-check" />
+            Your username is: <strong>{email}</strong><br /><br />
+            <button className="btn-prim" onClick={onBack}>Sign In with this Email</button>
+          </div>
+        )}
+        <div style={{marginTop:14,textAlign:"center",fontSize:13,color:"#888"}}>
+          Still need help? Call <a href="tel:8887036999" className="lnk">888.703.6999</a>
         </div>
       </div>
     </div>
   );
 }
 
-/* ════════════════════════════════════════════
-   HEADER
-   ════════════════════════════════════════════ */
-function Header({ account, onSignOut }) {
+/* ──────────────────────────────────────────────────────────
+   DASHBOARD
+────────────────────────────────────────────────────────── */
+function Dashboard({ sess }) {
+  const { claims, accessToken } = sess;
+  const name  = claims.name || claims.preferred_username || "Member";
+  const email = claims.email || claims.preferred_username || "";
+  const CARDS = [
+    {ic:"fa-id-card",         t:"My ID Card",      d:"View / print card"},
+    {ic:"fa-tooth",           t:"Find a Dentist",  d:"In-network near you"},
+    {ic:"fa-file-medical",    t:"My Benefits",     d:"Coverage & limits"},
+    {ic:"fa-clock-rotate-left",t:"Claims",         d:"Track submissions"},
+    {ic:"fa-calendar-check",  t:"Appointments",    d:"Schedule & manage"},
+    {ic:"fa-download",        t:"Documents",       d:"EOBs & letters"},
+    {ic:"fa-bell",            t:"Notifications",   d:"Alerts & messages"},
+    {ic:"fa-headset",         t:"Support",         d:"Contact member services"},
+  ];
+  return (
+    <div className="dash">
+      <div className="dash-greet">
+        <h2>Welcome back, {name.split(" ")[0]} 👋</h2>
+        <p>Your My Compass dashboard — authenticated via Entra Native Auth API.</p>
+      </div>
+      <div className="dash-grid">
+        {CARDS.map(c => (
+          <div className="dcard" key={c.t} tabIndex={0} role="button" aria-label={c.t}>
+            <div className="dcard-ic"><i className={"fa-solid " + c.ic} /></div>
+            <h3>{c.t}</h3><p>{c.d}</p>
+          </div>
+        ))}
+      </div>
+      <div className="dash-info">
+        <div className="di-card">
+          <h4><i className="fa-solid fa-user" />Account Info</h4>
+          <div className="di-row"><span>Name</span><strong>{name}</strong></div>
+          <div className="di-row"><span>Email</span><strong>{email}</strong></div>
+          <div className="di-row"><span>Auth Method</span><span className="badge bg-purple">Native Auth API</span></div>
+          <div className="di-row"><span>Tenant</span><strong style={{fontSize:11}}>{(claims.tid||"").slice(0,18)}…</strong></div>
+          {accessToken && <>
+            <div style={{fontSize:11,color:"#888",fontWeight:700,marginTop:10,marginBottom:4}}>ACCESS TOKEN</div>
+            <div className="token-pre">{accessToken.slice(0, 220)}…</div>
+          </>}
+        </div>
+        <div className="di-card">
+          <h4><i className="fa-solid fa-shield-halved" />Plan Status</h4>
+          <div className="di-row"><span>Membership</span><span className="badge bg-green">Active</span></div>
+          <div className="di-row"><span>Portal</span><strong>My Compass</strong></div>
+          <div className="di-row"><span>Access</span><strong>24 / 7</strong></div>
+          <div className="di-row"><span>Support</span><strong>888.703.6999</strong></div>
+          <div className="di-row"><span>ID Token</span><span className="badge bg-blue">Valid</span></div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ──────────────────────────────────────────────────────────
+   PAGE CHROME  (TopBar, Header, Footer)
+────────────────────────────────────────────────────────── */
+function TopBar() {
+  function changeFont(d) {
+    const cur = parseFloat(document.documentElement.style.fontSize) || 100;
+    document.documentElement.style.fontSize = (d === 0 ? 100 : Math.min(130, Math.max(85, cur + d * 5))) + "%";
+  }
+  return (
+    <div className="topbar">
+      <div className="tb-in">
+        <span style={{opacity:.8}}>Text Size</span>
+        <button className="tb-btn" onClick={() => changeFont(-1)} aria-label="Decrease font">−</button>
+        <button className="tb-btn" onClick={() => changeFont(0)}  aria-label="Reset font">↺</button>
+        <button className="tb-btn" onClick={() => changeFont(1)}  aria-label="Increase font">+</button>
+        <span style={{opacity:.25}}>|</span>
+        <span style={{opacity:.8,display:"flex",alignItems:"center",gap:5}}>
+          <img src={window.ASSETS.langIco} alt="" style={{width:15,height:15}} /> English
+        </span>
+      </div>
+    </div>
+  );
+}
+
+function SiteHeader({ sess, onSignOut }) {
   return (
     <header className="site-header">
-      <div className="nav-inner">
-        <a href="https://memberportal.libertydentalplan.com/" aria-label="LIBERTY Dental Plan home">
+      <div className="nav-in">
+        <a href="https://memberportal.libertydentalplan.com/">
           <img src={window.ASSETS.logo} alt="LIBERTY Dental Plan" className="logo-img" />
         </a>
         <div className="nav-right">
-          <button className="btn-emergency"
-            onClick={() => window.open("https://www.teledentistry.com/insurance/liberty","_blank")}
-            aria-label="I have a Dental Emergency">
-            <i className="fa-solid fa-tooth" style={{marginRight:5}}/>
-            I have a Dental Emergency
+          <button className="btn-emg"
+            onClick={() => window.open("https://www.teledentistry.com/insurance/liberty","_blank")}>
+            <i className="fa-solid fa-tooth" style={{marginRight:5}} />Dental Emergency
           </button>
-          {account && (
-            <button className="btn-signout" onClick={onSignOut}>
-              <i className="fa-solid fa-right-from-bracket"/>Sign Out
+          {sess && (
+            <button className="btn-out" onClick={onSignOut}>
+              <i className="fa-solid fa-right-from-bracket" style={{marginRight:4}} />Sign Out
             </button>
           )}
         </div>
@@ -327,513 +995,44 @@ function Header({ account, onSignOut }) {
   );
 }
 
-/* ════════════════════════════════════════════
-   SIGN IN VIEW  
-   (Microsoft popup + redirect, username hint)
-   ════════════════════════════════════════════ */
-function SignInView({ onAuth, onGo }) {
-  const [username, setUsername] = useState("");
-  const [pw, setPw]             = useState("");
-  const [showPw, setShowPw]     = useState(false);
-  const [loading, setLoading]   = useState(false);
-  const [msLoad, setMsLoad]     = useState(false);
-  const [err, setErr]           = useState("");
-
-  /* Interactive popup (recommended for CIAM) */
-  const signInPopup = async () => {
-    setErr(""); setMsLoad(true);
-    try {
-      const inst = await getMsal();
-      const req = { ...SCOPES };
-      if (username.trim()) req.loginHint = username.trim();
-      const res = await inst.loginPopup(req);
-      onAuth(res.account, res.accessToken);
-    } catch (e) {
-      if (e.errorCode !== "user_cancelled" && e.errorCode !== "popup_window_error") {
-        setErr(e.message || "Sign-in failed. Please try again.");
-      }
-    } finally { setMsLoad(false); }
-  };
-
-  /* Redirect fallback */
-  const signInRedirect = async () => {
-    setErr("");
-    try {
-      const inst = await getMsal();
-      const req = { ...SCOPES };
-      if (username.trim()) req.loginHint = username.trim();
-      await inst.loginRedirect(req);
-    } catch (e) {
-      setErr(e.message || "Redirect failed.");
-    }
-  };
-
-  /* Form-assisted: pre-fill login_hint then open popup */
-  const signInWithCreds = async () => {
-    setErr("");
-    if (!username.trim()) { setErr("Please enter your username or email."); return; }
-    setLoading(true);
-    try {
-      const inst = await getMsal();
-      const res = await inst.loginPopup({
-        ...SCOPES,
-        loginHint: username.trim(),
-        prompt: "login",
-      });
-      onAuth(res.account, res.accessToken);
-    } catch (e) {
-      if (e.errorCode !== "user_cancelled") {
-        setErr(e.message || "Sign-in failed. Please check your credentials.");
-      }
-    } finally { setLoading(false); }
-  };
-
-  return (
-    <div className="login-card">
-      <div className="lc-header">
-        <i className="fa-solid fa-shield-halved"/>
-        Member Login
-      </div>
-      <div className="lc-body">
-        <ErrBox msg={err} />
-
-        <MSButton onClick={signInPopup} disabled={loading} loading={msLoad}
-          label={msLoad ? "Signing in…" : "Sign in with Microsoft"} />
-
-        <div className="divider">or enter your username</div>
-
-        <div className="fg">
-          <label htmlFor="si-username">Username / Email</label>
-          <input id="si-username" type="text" placeholder="Your username or email"
-            value={username} onChange={e => setUsername(e.target.value)}
-            onKeyDown={e => e.key==="Enter" && signInWithCreds()}
-            className={err && !username ? "err" : ""} autoFocus autoComplete="username" />
-        </div>
-
-        <div className="fg">
-          <label htmlFor="si-pw">Password</label>
-          <div className="pw-wrap">
-            <input id="si-pw" type={showPw ? "text" : "password"} placeholder="Your password"
-              value={pw} onChange={e => setPw(e.target.value)}
-              onKeyDown={e => e.key==="Enter" && signInWithCreds()}
-              autoComplete="current-password" />
-            <button className="pw-eye" tabIndex={-1} type="button"
-              onClick={() => setShowPw(v => !v)} aria-label={showPw ? "Hide password" : "Show password"}>
-              <i className={`fa-solid fa-eye${showPw ? "-slash" : ""}`}/>
-            </button>
-          </div>
-        </div>
-
-        <button className="btn-primary" onClick={signInWithCreds} disabled={loading || msLoad}>
-          {loading ? <Spinner /> : null}
-          {loading ? "Signing in…" : "Login"}
-        </button>
-
-        <div className="forgot-row">
-          <span className="link" onClick={() => onGo("forgotPw")} role="button" tabIndex={0}
-            onKeyDown={e => e.key==="Enter" && onGo("forgotPw")}>Forgot Password?</span>
-          <span className="link" onClick={() => onGo("forgotUser")} role="button" tabIndex={0}
-            onKeyDown={e => e.key==="Enter" && onGo("forgotUser")}>Forgot Username?</span>
-        </div>
-
-        <div className="divider">New Member?</div>
-        <p style={{textAlign:"center",fontSize:13,color:"#555",marginBottom:10}}>
-          Click here to access your account
-        </p>
-        <button className="btn-outline" onClick={() => onGo("register")}>Register Now</button>
-
-        <p className="or-redirect">
-          Having trouble with the popup?{" "}
-          <a onClick={signInRedirect} tabIndex={0} role="button"
-            onKeyDown={e => e.key==="Enter" && signInRedirect()}>Sign in with redirect instead</a>
-        </p>
-      </div>
-    </div>
-  );
-}
-
-/* ════════════════════════════════════════════
-   REGISTER VIEW
-   (CIAM: loginPopup with prompt="create")
-   ════════════════════════════════════════════ */
-function RegisterView({ onBack, onAuth }) {
-  const [loading, setLoading] = useState(false);
-  const [err, setErr]         = useState("");
-
-  const doRegister = async () => {
-    setErr(""); setLoading(true);
-    try {
-      const inst = await getMsal();
-      const res = await inst.loginPopup({
-        ...SCOPES,
-        prompt: "create",  /* CIAM native account creation */
-      });
-      onAuth(res.account, res.accessToken);
-    } catch (e) {
-      if (e.errorCode !== "user_cancelled") {
-        setErr(e.message || "Registration failed. Please try again.");
-      }
-    } finally { setLoading(false); }
-  };
-
-  return (
-    <div className="login-card">
-      <div className="lc-header"><i className="fa-solid fa-user-plus"/>New Member Registration</div>
-      <div className="lc-body">
-        <button className="back-link" onClick={onBack} type="button">
-          <i className="fa-solid fa-arrow-left"/>Back to sign in
-        </button>
-        <ErrBox msg={err} />
-        <div className="reg-info">
-          <div className="reg-info-title">
-            <i className="fa-solid fa-shield-halved"/>Secure Registration via Microsoft Identity
-          </div>
-          <ul>
-            <li>Your Member Number and Date of Birth will be verified</li>
-            <li>You'll create a secure username and password</li>
-            <li>Multi-factor authentication is strongly recommended</li>
-          </ul>
-        </div>
-        <div className="reg-steps">
-          {["Click 'Create Account' below","Complete the sign-up form securely","Verify your email address","Return here — you'll be logged in automatically"].map((s,i) => (
-            <div className="reg-step" key={i}>
-              <div className="reg-step-num">{i+1}</div>
-              <span>{s}</span>
-            </div>
-          ))}
-        </div>
-        <MSButton onClick={doRegister} loading={loading}
-          label={loading ? "Opening registration…" : "Create Account with Microsoft"} />
-        <p className="auth-note">
-          Already registered?{" "}
-          <span className="link" onClick={onBack} role="button" tabIndex={0}
-            onKeyDown={e => e.key==="Enter" && onBack()}>Sign In</span>
-        </p>
-      </div>
-    </div>
-  );
-}
-
-/* ════════════════════════════════════════════
-   FORGOT PASSWORD VIEW
-   (CIAM SSPR via loginPopup with prompt=reset_password)
-   ════════════════════════════════════════════ */
-function ForgotPasswordView({ onBack }) {
-  const [email, setEmail]     = useState("");
-  const [loading, setLoading] = useState(false);
-  const [done, setDone]       = useState(false);
-  const [err, setErr]         = useState("");
-
-  const doReset = async () => {
-    setErr("");
-    if (!email.includes("@") || email.length < 5) {
-      setErr("Please enter a valid email address."); return;
-    }
-    setLoading(true);
-    try {
-      const inst = await getMsal();
-      /* CIAM supports native password reset via extraQueryParameters */
-      await inst.loginPopup({
-        ...SCOPES,
-        loginHint: email.trim(),
-        extraQueryParameters: { prompt: "reset_password" },
-        prompt: "login",
-      });
-      setDone(true);
-    } catch (e) {
-      if (e.errorCode === "user_cancelled") {
-        setErr("Password reset was cancelled. Please try again.");
-      } else if (e.message?.includes("AADB2C")) {
-        /* Fallback: open SSPR portal */
-        window.open("https://aka.ms/sspr", "_blank");
-        setDone(true);
-      } else {
-        setErr(e.message || "Reset failed. Please contact support.");
-      }
-    } finally { setLoading(false); }
-  };
-
-  return (
-    <div className="login-card">
-      <div className="lc-header"><i className="fa-solid fa-key"/>Reset Password</div>
-      <div className="lc-body">
-        <button className="back-link" onClick={onBack} type="button">
-          <i className="fa-solid fa-arrow-left"/>Back to sign in
-        </button>
-        {done ? (
-          <div className="success-box">
-            <i className="fa-solid fa-circle-check"/>
-            Password reset initiated. Follow the instructions in the pop-up or check your email for a reset link.
-            <br/><br/>
-            <span className="link" onClick={onBack} role="button" tabIndex={0}
-              onKeyDown={e => e.key==="Enter" && onBack()}>← Back to sign in</span>
-          </div>
-        ) : (
-          <>
-            <ErrBox msg={err} />
-            <p style={{fontSize:14,color:"#555",lineHeight:1.7,marginBottom:16}}>
-              Enter the email address associated with your account. You'll be guided through a secure password reset flow.
-            </p>
-            <div className="fg">
-              <label htmlFor="fp-email">Registered Email Address</label>
-              <input id="fp-email" type="email" placeholder="your@email.com"
-                value={email} onChange={e => setEmail(e.target.value)}
-                onKeyDown={e => e.key==="Enter" && doReset()}
-                className={err ? "err" : ""} autoFocus autoComplete="email" />
-            </div>
-            <button className="btn-primary" onClick={doReset} disabled={loading}>
-              {loading ? <Spinner /> : <i className="fa-solid fa-paper-plane"/>}
-              {loading ? "Processing…" : "Reset Password"}
-            </button>
-            <div style={{marginTop:14,textAlign:"center",fontSize:13,color:"#888"}}>
-              Need additional help?{" "}
-              <a href="https://www.libertydentalplan.com/Members/Member---Contact-Us.aspx"
-                 target="_blank" rel="noreferrer" className="link">Contact Member Services</a>
-            </div>
-          </>
-        )}
-      </div>
-    </div>
-  );
-}
-
-/* ════════════════════════════════════════════
-   FORGOT USERNAME VIEW
-   (Look up account by email; sign in with hint)
-   ════════════════════════════════════════════ */
-function ForgotUsernameView({ onBack }) {
-  const [email, setEmail]     = useState("");
-  const [loading, setLoading] = useState(false);
-  const [done, setDone]       = useState(false);
-  const [err, setErr]         = useState("");
-
-  const doLookup = async () => {
-    setErr("");
-    if (!email.includes("@") || email.length < 5) {
-      setErr("Please enter a valid email address."); return;
-    }
-    setLoading(true);
-    try {
-      /*
-        For CIAM, username retrieval is done by signing in with the email
-        as the login_hint. The user sees their account in the CIAM UI.
-        We open a popup with the email pre-filled so they can identify themselves.
-      */
-      const inst = await getMsal();
-      await inst.loginPopup({
-        ...SCOPES,
-        loginHint: email.trim(),
-        prompt: "login",
-      });
-      setDone(true);
-    } catch (e) {
-      if (e.errorCode === "user_cancelled") {
-        setErr("Lookup was cancelled.");
-      } else {
-        setErr(e.message || "Lookup failed. Please contact support.");
-      }
-    } finally { setLoading(false); }
-  };
-
-  return (
-    <div className="login-card">
-      <div className="lc-header"><i className="fa-solid fa-user-magnifying-glass"/>Forgot Username?</div>
-      <div className="lc-body">
-        <button className="back-link" onClick={onBack} type="button">
-          <i className="fa-solid fa-arrow-left"/>Back to sign in
-        </button>
-        {done ? (
-          <div className="success-box">
-            <i className="fa-solid fa-circle-check"/>
-            We've opened your account in a secure window. Your username is typically your email address or the one you chose during registration.
-            <br/><br/>
-            <span className="link" onClick={onBack} role="button" tabIndex={0}
-              onKeyDown={e => e.key==="Enter" && onBack()}>← Return to sign in</span>
-          </div>
-        ) : (
-          <>
-            <ErrBox msg={err} />
-            <p style={{fontSize:14,color:"#555",lineHeight:1.7,marginBottom:16}}>
-              Enter your registered email address. We'll open a secure window to help you identify your account username.
-            </p>
-            <div className="fg">
-              <label htmlFor="fu-email">Registered Email Address</label>
-              <input id="fu-email" type="email" placeholder="your@email.com"
-                value={email} onChange={e => setEmail(e.target.value)}
-                onKeyDown={e => e.key==="Enter" && doLookup()}
-                className={err ? "err" : ""} autoFocus autoComplete="email" />
-            </div>
-            <button className="btn-primary" onClick={doLookup} disabled={loading}>
-              {loading ? <Spinner /> : <i className="fa-solid fa-magnifying-glass"/>}
-              {loading ? "Looking up…" : "Find My Account"}
-            </button>
-            <div style={{marginTop:14,textAlign:"center",fontSize:13,color:"#888"}}>
-              Still need help?{" "}
-              <a href="tel:8887036999" className="link">Call 888.703.6999</a>
-            </div>
-          </>
-        )}
-      </div>
-    </div>
-  );
-}
-
-/* ════════════════════════════════════════════
-   HERO (left panel)
-   ════════════════════════════════════════════ */
-function Hero() {
-  const features = [
-    ["fa-tooth",          "Find a Dentist",       "Search in-network dentists near you"],
-    ["fa-id-card",        "Digital Member ID",    "View or download your Member ID Card"],
-    ["fa-file-medical",   "Benefits & Coverage",  "Understand your dental plan benefits"],
-    ["fa-clock-rotate-left","Claims Tracking",    "Monitor submitted claims in real time"],
-  ];
-  return (
-    <div>
-      <h1 className="hero-title">
-        Welcome to<br/><span className="accent">My Compass</span>
-      </h1>
-      <p className="hero-subtitle">
-        Liberty wants to get you the information you need, when you need it.
-        Look for a dentist, read about your benefits, download a copy of your Member ID Card, and more!
-        You can log into this portal <strong>24 hours a day, 7 days a week.</strong>
-      </p>
-      <div className="hero-features">
-        {features.map(([icon,title,desc]) => (
-          <div className="hf-item" key={title}>
-            <div className="hf-icon"><i className={`fa-solid ${icon}`}/></div>
-            <div className="hf-text">
-              <h4>{title}</h4>
-              <p>{desc}</p>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-/* ════════════════════════════════════════════
-   DASHBOARD (post-auth)
-   ════════════════════════════════════════════ */
-function Dashboard({ account }) {
-  const name   = account?.name || account?.username || "Member";
-  const email  = account?.username || "—";
-  const tid    = account?.tenantId || "—";
-  const cards = [
-    { icon:"fa-id-card",         title:"My ID Card",       desc:"View or print your card"           },
-    { icon:"fa-tooth",           title:"Find a Dentist",   desc:"In-network providers near you"     },
-    { icon:"fa-file-medical",    title:"My Benefits",      desc:"Coverage details & limits"          },
-    { icon:"fa-clock-rotate-left",title:"Claims History",  desc:"Track submitted claims"             },
-    { icon:"fa-calendar-check",  title:"Appointments",     desc:"Schedule & manage visits"           },
-    { icon:"fa-bell",            title:"Notifications",    desc:"Alerts and messages"                },
-    { icon:"fa-download",        title:"Documents",        desc:"EOBs, forms & letters"              },
-    { icon:"fa-headset",         title:"Member Services",  desc:"Contact our support team"           },
-  ];
-  return (
-    <div className="dash-wrap">
-      <div className="dash-greeting">
-        <h2>Welcome back, {name.split(" ")[0]} 👋</h2>
-        <p>Here's a quick overview of your member dashboard — My Compass.</p>
-      </div>
-      <div className="dash-cards">
-        {cards.map(c => (
-          <div className="d-card" key={c.title} role="button" tabIndex={0}>
-            <div className="d-card-icon"><i className={`fa-solid ${c.icon}`}/></div>
-            <h3>{c.title}</h3>
-            <p>{c.desc}</p>
-          </div>
-        ))}
-      </div>
-      <div className="dash-info">
-        <div className="d-info-card">
-          <h4><i className="fa-solid fa-user"/>Account Info</h4>
-          <div className="d-row"><span>Name</span><strong>{name}</strong></div>
-          <div className="d-row"><span>Email</span><strong>{email}</strong></div>
-          <div className="d-row"><span>Auth Method</span><span className="badge-verified">Microsoft CIAM</span></div>
-          <div className="d-row"><span>Tenant</span><strong style={{fontSize:11}}>{tid.slice(0,18)}…</strong></div>
-        </div>
-        <div className="d-info-card">
-          <h4><i className="fa-solid fa-shield-halved"/>Plan Status</h4>
-          <div className="d-row"><span>Membership</span><span className="badge-active">Active</span></div>
-          <div className="d-row"><span>Portal</span><strong>My Compass</strong></div>
-          <div className="d-row"><span>Access</span><strong>24/7 Online</strong></div>
-          <div className="d-row"><span>Support</span><strong>888.703.6999</strong></div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* ════════════════════════════════════════════
-   FOOTER
-   ════════════════════════════════════════════ */
-function Footer() {
+function SiteFooter() {
   const yr = new Date().getFullYear();
   return (
-    <footer className="site-footer">
-      <div className="footer-main">
+    <footer className="footer">
+      <div className="fi">
         <div>
-          <img src={window.ASSETS.footerLogo} alt="LIBERTY Dental Plan" className="footer-logo-img" />
-          <p className="footer-tagline">Helping members smile brighter since 1994.<br/>Available 24/7 online.</p>
+          <img src={window.ASSETS.fLogo} alt="LIBERTY Dental Plan" className="f-logo" />
+          <p className="f-tag">Helping members smile brighter since 1994.<br />Available 24 / 7 online.</p>
         </div>
-        <div className="footer-col">
-          <h5>Explore</h5>
-          <ul>
-            <li><a href="https://www.libertydentalplan.com/Members/Welcome-to-Member-Services.aspx" target="_blank" rel="noreferrer">Members</a></li>
-            <li><a href="https://www.libertydentalplan.com/Providers/Providers-1.aspx" target="_blank" rel="noreferrer">Providers</a></li>
-            <li><a href="https://www.libertydentalplan.com/Agents-Brokers-1/Welcome-1-1.aspx" target="_blank" rel="noreferrer">Brokers</a></li>
-          </ul>
-        </div>
-        <div className="footer-col">
-          <h5>Programs</h5>
-          <ul>
-            <li><a href="https://www.libertydentalplan.com/Programs/Medicaid.aspx" target="_blank" rel="noreferrer">Medicaid</a></li>
-            <li><a href="https://www.libertydentalplan.com/LIBERTY-Dental-Plan-of-California/Medi-Cal/Medi-Cal-LA-PHP-.aspx" target="_blank" rel="noreferrer">Medi-Cal</a></li>
-            <li><a href="https://www.libertydentalplan.com/Programs/Commercial-1.aspx" target="_blank" rel="noreferrer">Commercial</a></li>
-            <li><a href="https://sales.libertydentalplan.com/dentalplans" target="_blank" rel="noreferrer">Individual &amp; Family</a></li>
-            <li><a href="https://www.libertydentalplan.com/Programs/Request-Quote.aspx" target="_blank" rel="noreferrer">Get a Quote</a></li>
-          </ul>
-        </div>
-        <div className="footer-col">
-          <h5>About</h5>
-          <ul>
-            <li><a href="https://www.libertydentalplan.com/About-LIBERTY/Company-Facts.aspx" target="_blank" rel="noreferrer">Overview</a></li>
-            <li><a href="https://www.libertydentalplan.com/About-LIBERTY/Careers-Open-Positions.aspx" target="_blank" rel="noreferrer">Careers</a></li>
-            <li><a href="https://www.libertydentalplan.com/About-LIBERTY/Compliance/Code-of-Conduct.aspx" target="_blank" rel="noreferrer">Compliance</a></li>
-            <li><a href="https://www.libertydentalplan.com/About-LIBERTY/Company-News.aspx" target="_blank" rel="noreferrer">News &amp; Events</a></li>
-            <li><a href="https://www.libertydentalplan.com/About-LIBERTY/Contact-Us.aspx" target="_blank" rel="noreferrer">Contact Us</a></li>
-          </ul>
-        </div>
-        <div className="footer-col">
-          <h5>Member Resources</h5>
-          <ul>
-            <li><a href="https://www.libertydentalplan.com/Members/Member---Contact-Us.aspx" target="_blank" rel="noreferrer">Contact Member Services</a></li>
-            <li><a href="https://www.libertydentalplan.com/Find-A-Dentist/Find-A-Dentist.aspx" target="_blank" rel="noreferrer">Find A Dentist</a></li>
-            <li><a href="https://www.libertydentalplan.com/Members/LIBERTY-Mobile.aspx" target="_blank" rel="noreferrer">Mobile App</a></li>
-            <li><a href="https://itransact.libertydentalplan.com/LBT/iTransact/Logon/Logon.aspx" target="_blank" rel="noreferrer">Member Login (Legacy)</a></li>
-          </ul>
-        </div>
+        {[
+          { h:"Explore", links:[["Members","https://www.libertydentalplan.com/Members/Welcome-to-Member-Services.aspx"],["Providers","https://www.libertydentalplan.com/Providers/Providers-1.aspx"],["Brokers","https://www.libertydentalplan.com/Agents-Brokers-1/Welcome-1-1.aspx"]] },
+          { h:"Programs", links:[["Medicaid","https://www.libertydentalplan.com/Programs/Medicaid.aspx"],["Medi-Cal","https://www.libertydentalplan.com/LIBERTY-Dental-Plan-of-California/Medi-Cal/Medi-Cal-LA-PHP-.aspx"],["Commercial","https://www.libertydentalplan.com/Programs/Commercial-1.aspx"],["Individual & Family","https://sales.libertydentalplan.com/dentalplans"]] },
+          { h:"About", links:[["Overview","https://www.libertydentalplan.com/About-LIBERTY/Company-Facts.aspx"],["Careers","https://www.libertydentalplan.com/About-LIBERTY/Careers-Open-Positions.aspx"],["Compliance","https://www.libertydentalplan.com/About-LIBERTY/Compliance/Code-of-Conduct.aspx"],["Contact Us","https://www.libertydentalplan.com/About-LIBERTY/Contact-Us.aspx"]] },
+          { h:"Member Resources", links:[["Contact Services","https://www.libertydentalplan.com/Members/Member---Contact-Us.aspx"],["Find A Dentist","https://www.libertydentalplan.com/Find-A-Dentist/Find-A-Dentist.aspx"],["Mobile App","https://www.libertydentalplan.com/Members/LIBERTY-Mobile.aspx"]] },
+        ].map(col => (
+          <div className="fcol" key={col.h}>
+            <h5>{col.h}</h5>
+            <ul>{col.links.map(([l,h]) => <li key={l}><a href={h} target="_blank" rel="noreferrer">{l}</a></li>)}</ul>
+          </div>
+        ))}
       </div>
-      <div className="footer-bottom">
-        <div className="footer-bottom-inner">
+      <div className="f-bot">
+        <div className="f-bot-in">
           <span>© {yr} LIBERTY Dental Plan</span>
-          <div className="footer-links">
+          <div className="f-links">
             <a href="https://www.libertydentalplan.com/Legal/Privacy-Statement/Patient-Privacy-1.aspx" target="_blank" rel="noreferrer">Privacy Notice</a>
             <a href="https://www.libertydentalplan.com/Legal/Sitemap.aspx" target="_blank" rel="noreferrer">Site Map</a>
             <a href="https://www.libertydentalplan.com/Legal/Grievances.aspx" target="_blank" rel="noreferrer">Grievance Forms</a>
             <a href="https://www.libertydentalplan.com/Members/Forms-Literature.aspx" target="_blank" rel="noreferrer">
-              <img src={window.ASSETS.langIcon} alt="" style={{width:14,height:14}} aria-hidden="true"/>
-              Nondiscrimination &amp; Language Assistance
+              <img src={window.ASSETS.langIco} alt="" style={{width:12,height:12}} />Language Assistance
             </a>
           </div>
-          <div className="footer-social">
-            <a href="https://www.instagram.com/libertydentalplan" target="_blank" rel="noreferrer" aria-label="Instagram"><i className="fab fa-instagram"/></a>
-            <a href="https://www.facebook.com/libertydentalplan" target="_blank" rel="noreferrer" aria-label="Facebook"><i className="fab fa-facebook-f"/></a>
-            <a href="https://www.youtube.com/@libertydentalplan" target="_blank" rel="noreferrer" aria-label="YouTube"><i className="fab fa-youtube"/></a>
-            <span className="scroll-top" onClick={() => window.scrollTo({top:0,behavior:"smooth"})}>
-              <img src={window.ASSETS.arrowUp} alt="" style={{width:14,height:14}} aria-hidden="true"/>
-              Top
+          <div className="f-soc">
+            <a href="https://www.instagram.com/libertydentalplan" target="_blank" rel="noreferrer" aria-label="Instagram"><i className="fab fa-instagram" /></a>
+            <a href="https://www.facebook.com/libertydentalplan"  target="_blank" rel="noreferrer" aria-label="Facebook"><i className="fab fa-facebook-f" /></a>
+            <a href="https://www.youtube.com/@libertydentalplan"  target="_blank" rel="noreferrer" aria-label="YouTube"><i className="fab fa-youtube" /></a>
+            <span style={{cursor:"pointer"}} onClick={() => window.scrollTo({top:0,behavior:"smooth"})}>
+              <img src={window.ASSETS.arrowUp} alt="Back to top" style={{width:14,height:14}} />
             </span>
           </div>
         </div>
@@ -842,102 +1041,97 @@ function Footer() {
   );
 }
 
-/* ════════════════════════════════════════════
+/* ──────────────────────────────────────────────────────────
    ROOT APP
-   ════════════════════════════════════════════ */
+────────────────────────────────────────────────────────── */
 function App() {
-  const [account, setAccount]   = useState(null);
-  const [ready, setReady]       = useState(false);
-  const [view, setView]         = useState("signin");   // signin | register | forgotPw | forgotUser
-  const [alert1, setAlert1]     = useState(true);
-  const [alert2, setAlert2]     = useState(true);
+  const [sess,   setSess]  = useState(null);
+  const [screen, setScreen]= useState("signin");
+  const [a1, setA1] = useState(true);
+  const [a2, setA2] = useState(true);
+  const proxyOk = !!window.NA_CONFIG.PROXY;
 
-  /* Handle redirect callback on page load */
-  useEffect(() => {
-    (async () => {
-      try {
-        const inst = await getMsal();
-        const res  = await inst.handleRedirectPromise();
-        if (res?.account) {
-          setAccount(res.account);
-        } else {
-          const accounts = inst.getAllAccounts();
-          if (accounts.length) setAccount(accounts[0]);
-        }
-      } catch (e) {
-        console.error("[MSAL] init error:", e);
-      } finally {
-        setReady(true);
-      }
-    })();
-  }, []);
+  const handleAuth = useCallback(s => { setSess(s); setScreen("signin"); }, []);
+  const handleSignOut = useCallback(() => { setSess(null); setScreen("signin"); }, []);
 
-  const handleAuth = useCallback((acc) => {
-    setAccount(acc);
-    setView("signin");
-  }, []);
-
-  const handleSignOut = useCallback(async () => {
-    try {
-      const inst = await getMsal();
-      await inst.logoutPopup({ account });
-    } catch(e) { console.error("[MSAL] logout:", e); }
-    setAccount(null);
-  }, [account]);
-
-  if (!ready) {
-    return (
-      <div className="page-loader" role="status" aria-live="polite">
-        <div className="big-spin" aria-hidden="true"/>
-        <p>Loading portal…</p>
-      </div>
-    );
+  function authPanel() {
+    switch (screen) {
+      case "register":   return <RegisterFlow onBack={() => setScreen("signin")} onAuth={handleAuth} />;
+      case "resetpw":    return <ResetPwFlow  onBack={() => setScreen("signin")} />;
+      case "forgotuser": return <ForgotUserFlow onBack={() => setScreen("signin")} />;
+      default:           return <SignInFlow onAuth={handleAuth} onGo={setScreen} />;
+    }
   }
-
-  const rightPanel = () => {
-    if (view === "register")   return <RegisterView      onBack={() => setView("signin")} onAuth={handleAuth} />;
-    if (view === "forgotPw")   return <ForgotPasswordView onBack={() => setView("signin")} />;
-    if (view === "forgotUser") return <ForgotUsernameView onBack={() => setView("signin")} />;
-    return <SignInView onAuth={handleAuth} onGo={setView} />;
-  };
 
   return (
     <>
       <TopBar />
-      <Header account={account} onSignOut={handleSignOut} />
-      <main className="page-main">
-        {account ? (
-          <Dashboard account={account} />
+
+      {!proxyOk && (
+        <div className="cors-bar">
+          <i className="fa-solid fa-triangle-exclamation" />
+          <span>
+            <strong>Proxy required —</strong> Native Auth API blocks CORS in browsers.
+            Run <code>node proxy-server.js</code> then set <code>PROXY = "http://localhost:3001/proxy"</code> in this file.
+          </span>
+        </div>
+      )}
+
+      <SiteHeader sess={sess} onSignOut={handleSignOut} />
+
+      <main style={{flex:1}}>
+        {sess ? (
+          <Dashboard sess={sess} />
         ) : (
           <div className="hero-layout">
-            {/* ── Left: hero ── */}
-            <Hero />
-            {/* ── Right: auth panel ── */}
-            <div className="lc-wrap">
-              {view === "signin" && (
-                <>
-                  {alert1 && (
-                    <div className="alert-info" role="alert">
-                      <img src={window.ASSETS.infoIcon} alt="" aria-hidden="true"/>
-                      <span>Para obtener ayuda en español, llame al <strong>888.703.6999</strong></span>
-                      <button className="alert-close" onClick={() => setAlert1(false)} aria-label="Close">×</button>
-                    </div>
-                  )}
-                  {alert2 && (
-                    <div className="alert-warning" role="alert">
-                      <i className="fa-solid fa-triangle-exclamation" aria-hidden="true"/>
-                      <span>Please <strong>re-register</strong> with a new username and password the <strong>first time</strong> you login to the new Portal and App.</span>
-                      <button className="alert-close" onClick={() => setAlert2(false)} aria-label="Close">×</button>
-                    </div>
-                  )}
-                </>
+            {/* LEFT HERO */}
+            <div>
+              <h1 className="hero-title">
+                Welcome to<br /><span className="hero-acc">My Compass</span>
+              </h1>
+              <p className="hero-sub">
+                Liberty wants to get you the information you need, when you need it.
+                Look for a dentist, read about your benefits, download your Member ID Card, and more!
+                {" "}<strong>24 hours a day, 7 days a week.</strong>
+              </p>
+              <div className="hero-feats">
+                {[
+                  ["fa-tooth",            "Find In-Network Dentists",  "Search by location, specialty or name"],
+                  ["fa-id-card",          "Digital Member ID Card",    "Access your card anytime, anywhere"],
+                  ["fa-file-medical",     "Benefits & Coverage",       "Review what's covered under your plan"],
+                  ["fa-clock-rotate-left","Claims Tracking",           "Monitor submitted claims in real time"],
+                ].map(([ic, t, d]) => (
+                  <div className="hf" key={t}>
+                    <div className="hf-ic"><i className={"fa-solid " + ic} /></div>
+                    <div><div className="hf-t">{t}</div><div className="hf-d">{d}</div></div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* RIGHT AUTH PANEL */}
+            <div style={{display:"flex",flexDirection:"column",gap:10}}>
+              {screen === "signin" && a1 && (
+                <div className="al al-info" role="alert">
+                  <img src={window.ASSETS.infoIco} alt="" style={{width:18,height:18,flexShrink:0,marginTop:1}} />
+                  <span>Para obtener ayuda en español, llame al <strong>888.703.6999</strong></span>
+                  <button className="al-x" onClick={() => setA1(false)} aria-label="Close">×</button>
+                </div>
               )}
-              {rightPanel()}
+              {screen === "signin" && a2 && (
+                <div className="al al-warn" role="alert">
+                  <i className="fa-solid fa-triangle-exclamation" style={{color:"#f59e0b",flexShrink:0,marginTop:2}} />
+                  <span>Please <strong>re-register</strong> with a new username and password the <strong>first time</strong> you login.</span>
+                  <button className="al-x" onClick={() => setA2(false)} aria-label="Close">×</button>
+                </div>
+              )}
+              {authPanel()}
             </div>
           </div>
         )}
       </main>
-      <Footer />
+
+      <SiteFooter />
     </>
   );
 }
