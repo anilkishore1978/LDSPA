@@ -466,11 +466,11 @@ function PwField({ id, label, value, onChange, meter, ph, complete }) {
 
 /* ──────────────────────────────────────────────────────────
    SIGN-IN FLOW
-   step 0: email  →  step 1: password -or- OTP
+   step 0: email OR username  →  step 1: password -or- OTP
 ────────────────────────────────────────────────────────── */
 function SignInFlow({ onAuth, onGo }) {
   const [step,    setStep]  = useState(0);
-  const [email,   setEmail] = useState("");
+  const [loginId, setLoginId] = useState("");   // accepts email OR username
   const [token,   setToken] = useState("");
   const [chal,    setChal]  = useState("");
   const [target,  setTgt]   = useState("");
@@ -481,17 +481,24 @@ function SignInFlow({ onAuth, onGo }) {
   const [busy,    setBusy]  = useState(false);
   const [err,     setErr]   = useState(null);
 
+  // Entra Native Auth uses `username` for both email and UPN/alias identifiers.
+  // We pass whatever the user typed directly — the API resolves it.
   async function goStep1() {
     setErr(null);
-    if (!email.includes("@")) { setErr("Enter a valid email address."); return; }
+    const id = loginId.trim();
+    if (!id) { setErr("Enter your email address or username."); return; }
+    // Basic format check: email must have @, plain usernames must be non-empty strings
+    if (id.includes("@") === false && id.length < 2) {
+      setErr("Enter a valid email or username."); return;
+    }
     setBusy(true);
     try {
-      const r1 = await SI.initiate(email.trim());
+      const r1 = await SI.initiate(id);
       if (r1.challenge_type === "redirect") { setErr("Tenant requires browser-based login."); return; }
       const r2 = await SI.challenge(r1.continuation_token);
       setToken(r2.continuation_token);
       setChal(r2.challenge_type);
-      setTgt(r2.challenge_target_label || email);
+      setTgt(r2.challenge_target_label || id);
       if (r2.code_length) setClen(r2.code_length);
       if (r2.interval)    setIvl(r2.interval);
       setStep(1);
@@ -524,16 +531,25 @@ function SignInFlow({ onAuth, onGo }) {
     <div className="acard">
       <div className="acard-head"><i className="fa-solid fa-shield-halved" />Member Login</div>
       <div className="acard-body">
-        <Steps list={["Your Email", "Verification"]} cur={step} />
+        <Steps list={["Your Identity", "Verification"]} cur={step} />
         <ErrBox e={err} />
 
         {step === 0 && (
           <>
             <div className="fg">
-              <label htmlFor="si-em">Email Address</label>
-              <input id="si-em" type="email" placeholder="your@email.com"
-                value={email} onChange={ev => setEmail(ev.target.value)}
-                onKeyDown={ev => ev.key === "Enter" && goStep1()} autoFocus />
+              <label htmlFor="si-id">Email Address or Username</label>
+              <input
+                id="si-id"
+                type="text"
+                placeholder="your@email.com or username"
+                value={loginId}
+                onChange={ev => setLoginId(ev.target.value)}
+                onKeyDown={ev => ev.key === "Enter" && goStep1()}
+                autoCapitalize="none"
+                autoCorrect="off"
+                autoComplete="username"
+                autoFocus
+              />
             </div>
             <button className="btn-prim" onClick={goStep1} disabled={busy}>
               {busy && <Spin />}{busy ? "Checking…" : "Continue"}
@@ -549,7 +565,9 @@ function SignInFlow({ onAuth, onGo }) {
 
         {step === 1 && chal === "password" && (
           <>
-            <div className="m-info"><i className="fa-solid fa-user" /> Signing in as <strong>{email}</strong></div>
+            <div className="m-info">
+              <i className="fa-solid fa-user" /> Signing in as <strong>{loginId.trim()}</strong>
+            </div>
             <PwField id="si-pw" label="Password" value={pw} onChange={setPw} ph="Your password" />
             <button className="btn-prim" onClick={submit} disabled={busy || !pw}>
               {busy && <Spin />}{busy ? "Signing in…" : "Login"}
