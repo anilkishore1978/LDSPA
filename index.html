@@ -257,10 +257,13 @@ const SI = {
 
 /* SIGN-UP */
 const SU = {
-  start     : (username, password, displayName) => naPost("/signup/v1.0/start", {
-    username, challenge_type: CHAL_TYPES,
+  // attrs = { givenName, surname, displayName, jobTitle, city, country, ... }
+  // All sent as JSON-stringified `attributes` per Entra Native Auth spec.
+  start: (username, password, attrs = {}) => naPost("/signup/v1.0/start", {
+    username,
+    challenge_type: CHAL_TYPES,
     ...(password ? { password } : {}),
-    ...(displayName ? { attributes: JSON.stringify({ displayName }) } : {}),
+    ...(Object.keys(attrs).length ? { attributes: JSON.stringify(attrs) } : {}),
   }),
   challenge : (continuation_token) => naPost("/signup/v1.0/challenge",
     { continuation_token, challenge_type: CHAL_TYPES }),
@@ -584,29 +587,58 @@ function SignInFlow({ onAuth, onGo }) {
    REGISTER FLOW
    step 0: details  →  step 1: verify OTP  →  step 2: success
 ────────────────────────────────────────────────────────── */
-function RegisterFlow({ onBack, onAuth }) {
-  const [step,  setStep]  = useState(0);
-  const [name,  setName]  = useState("");
-  const [email, setEmail] = useState("");
-  const [pw,    setPw]    = useState("");
-  const [pwc,   setPwc]   = useState("");
-  const [tok,   setTok]   = useState("");
-  const [otp,   setOtp]   = useState("");
-  const [clen,  setClen]  = useState(8);
-  const [tgt,   setTgt]   = useState("");
-  const [ivl,   setIvl]   = useState(60);
-  const [busy,  setBusy]  = useState(false);
-  const [err,   setErr]   = useState(null);
+function RegisterFlow({ onBack, onAuth, onGo }) {
+  const [step,        setStep]       = useState(0);
+  // Form fields — matching the working test form
+  const [flatUsername,setFlatUsername] = useState("");
+  const [firstName,   setFirstName]  = useState("");
+  const [lastName,    setLastName]   = useState("");
+  const [jobTitle,    setJobTitle]   = useState("");
+  const [city,        setCity]       = useState("");
+  const [country,     setCountry]    = useState("");
+  const [email,       setEmail]      = useState("");
+  const [pw,          setPw]         = useState("");
+  const [pwc,         setPwc]        = useState("");
+  // Internal flow state
+  const [tok,         setTok]        = useState("");
+  const [otp,         setOtp]        = useState("");
+  const [clen,        setClen]       = useState(8);
+  const [tgt,         setTgt]        = useState("");
+  const [ivl,         setIvl]        = useState(60);
+  const [busy,        setBusy]       = useState(false);
+  const [err,         setErr]        = useState(null);
+  const [userExists,  setUserExists] = useState(false);
+
+  function resetForm() {
+    setFlatUsername(""); setFirstName(""); setLastName("");
+    setJobTitle(""); setCity(""); setCountry(""); setEmail("");
+    setPw(""); setPwc(""); setErr(null); setUserExists(false);
+  }
 
   async function startReg() {
     setErr(null);
-    if (!name.trim())           { setErr("Please enter your full name."); return; }
-    if (!email.includes("@"))   { setErr("Enter a valid email address."); return; }
-    if (pw.length < 8)          { setErr("Password must be at least 8 characters."); return; }
-    if (pw !== pwc)             { setErr("Passwords do not match."); return; }
+    setUserExists(false);
+    if (!firstName.trim())  { setErr("Please enter your first name."); return; }
+    if (!lastName.trim())   { setErr("Please enter your last name."); return; }
+    if (!email.includes("@")) { setErr("Enter a valid email address."); return; }
+    if (pw.length < 8)      { setErr("Password must be at least 8 characters."); return; }
+    if (pw !== pwc)         { setErr("Passwords do not match."); return; }
+
+    // Build the attributes object — map form fields to Entra attribute names
+    const attrs = {
+      displayName : (firstName.trim() + " " + lastName.trim()),
+      givenName   : firstName.trim(),
+      surname     : lastName.trim(),
+      ...(jobTitle.trim()     ? { jobTitle     : jobTitle.trim() }     : {}),
+      ...(city.trim()         ? { city         : city.trim() }         : {}),
+      ...(country.trim()      ? { country      : country.trim() }      : {}),
+      // flatUsername maps to a custom extension attribute in your tenant
+      ...(flatUsername.trim() ? { extension_alias : flatUsername.trim() } : {}),
+    };
+
     setBusy(true);
     try {
-      const r1 = await SU.start(email.trim(), pw, name.trim());
+      const r1 = await SU.start(email.trim(), pw, attrs);
       const r2 = await SU.challenge(r1.continuation_token);
       setTok(r2.continuation_token);
       setTgt(r2.challenge_target_label || email);
@@ -614,9 +646,13 @@ function RegisterFlow({ onBack, onAuth }) {
       if (r2.interval)    setIvl(r2.interval);
       setStep(1);
     } catch (e) {
-      setErr(e.code === "user_already_exists"
-        ? { code:"user_already_exists", desc:"This email is already registered." }
-        : e);
+      console.warn("[RegisterFlow] SU.start error:", e);
+      if (e.raw) console.warn("[RegisterFlow] Raw API response:", JSON.stringify(e.raw, null, 2));
+      if (e.code === "user_already_exists") {
+        setUserExists(true);
+      } else {
+        setErr(e);
+      }
     }
     finally { setBusy(false); }
   }
@@ -635,12 +671,11 @@ function RegisterFlow({ onBack, onAuth }) {
     try {
       const r1 = await SU.contOTP(tok, otp.trim());
       const finalTok = r1.continuation_token || tok;
-      // Try to auto sign-in
       try {
         const res = await SU.token(finalTok);
         onAuth({ idToken: res.id_token, accessToken: res.access_token, claims: jwtDecode(res.id_token) });
       } catch {
-        setStep(2); // account created, let them sign in manually
+        setStep(2);
       }
     } catch (e) { setErr(e); }
     finally { setBusy(false); }
@@ -653,32 +688,99 @@ function RegisterFlow({ onBack, onAuth }) {
         {step < 2 && <Steps list={["Your Details","Verify Email","Done"]} cur={step} />}
         {step < 2 && (
           <button className="btn-back"
-            onClick={() => { setErr(null); step === 0 ? onBack() : setStep(s => s - 1); }}>
+            onClick={() => { setErr(null); setUserExists(false); step === 0 ? onBack() : setStep(s => s - 1); }}>
             <i className="fa-solid fa-arrow-left" />{step === 0 ? "Back to Sign In" : "Back"}
           </button>
         )}
         <ErrBox e={err} />
 
+        {/* ── Step 0: Registration form ── */}
         {step === 0 && (
           <>
-            <div className="fg">
-              <label htmlFor="ru-name">Full Name *</label>
-              <input id="ru-name" type="text" placeholder="Your full name"
-                value={name} onChange={ev => setName(ev.target.value)} autoFocus />
-            </div>
-            <div className="fg">
-              <label htmlFor="ru-em">Email Address *</label>
-              <input id="ru-em" type="email" placeholder="your@email.com"
-                value={email} onChange={ev => setEmail(ev.target.value)} autoComplete="username" />
-            </div>
-            <PwField id="ru-pw"  label="Create Password *"  value={pw}  onChange={setPw}  meter ph="Min. 8 characters" complete="new-password" />
-            <PwField id="ru-pwc" label="Confirm Password *" value={pwc} onChange={setPwc} ph="Repeat password" complete="new-password" />
-            <button className="btn-prim" onClick={startReg} disabled={busy}>
-              {busy && <Spin />}{busy ? "Creating Account…" : "Create Account"}
-            </button>
+            {/* User-already-exists banner */}
+            {userExists && (
+              <div style={{background:"#fff8f0",border:"1px solid #f9c97c",borderRadius:6,padding:"14px 16px",marginBottom:14}}>
+                <div style={{display:"flex",alignItems:"flex-start",gap:9,marginBottom:12}}>
+                  <i className="fa-solid fa-circle-exclamation" style={{color:"#d97706",marginTop:2,flexShrink:0}} />
+                  <div>
+                    <div style={{fontWeight:700,fontSize:14,color:"#92400e"}}>
+                      An account with <strong>{email}</strong> already exists.
+                    </div>
+                    <div style={{fontSize:13,color:"#78350f",marginTop:3,lineHeight:1.5}}>
+                      This could mean you registered before, or this email is linked to a Microsoft account.
+                      Try signing in, or reset your password if you've forgotten it.
+                    </div>
+                  </div>
+                </div>
+                <div style={{display:"flex",gap:8,flexDirection:"column"}}>
+                  <button className="btn-prim" onClick={onBack}>
+                    <i className="fa-solid fa-right-to-bracket" style={{marginRight:6}} />Sign In with this Email
+                  </button>
+                  <button className="btn-sec" onClick={() => onGo("resetpw")}>
+                    <i className="fa-solid fa-key" style={{marginRight:6}} />Forgot Password? Reset it
+                  </button>
+                  <button className="btn-ghost" style={{marginTop:4}} onClick={resetForm}>
+                    Try a different email address
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Registration form — hidden once userExists */}
+            {!userExists && (
+              <>
+                {/* Row: First + Last name side by side */}
+                <div style={{display:"flex",gap:10}}>
+                  <div className="fg" style={{flex:1}}>
+                    <label htmlFor="ru-fn">First Name *</label>
+                    <input id="ru-fn" type="text" placeholder="First name"
+                      value={firstName} onChange={ev => setFirstName(ev.target.value)} autoFocus />
+                  </div>
+                  <div className="fg" style={{flex:1}}>
+                    <label htmlFor="ru-ln">Last Name *</label>
+                    <input id="ru-ln" type="text" placeholder="Last name"
+                      value={lastName} onChange={ev => setLastName(ev.target.value)} />
+                  </div>
+                </div>
+                <div className="fg">
+                  <label htmlFor="ru-alias">Username / Alias</label>
+                  <input id="ru-alias" type="text" placeholder="Preferred username (optional)"
+                    value={flatUsername} onChange={ev => setFlatUsername(ev.target.value)} />
+                </div>
+                <div className="fg">
+                  <label htmlFor="ru-job">Job Title *</label>
+                  <input id="ru-job" type="text" placeholder="Your job title"
+                    value={jobTitle} onChange={ev => setJobTitle(ev.target.value)} />
+                </div>
+                {/* Row: City + Country side by side */}
+                <div style={{display:"flex",gap:10}}>
+                  <div className="fg" style={{flex:1}}>
+                    <label htmlFor="ru-city">City *</label>
+                    <input id="ru-city" type="text" placeholder="City"
+                      value={city} onChange={ev => setCity(ev.target.value)} />
+                  </div>
+                  <div className="fg" style={{flex:1}}>
+                    <label htmlFor="ru-country">Country *</label>
+                    <input id="ru-country" type="text" placeholder="Country"
+                      value={country} onChange={ev => setCountry(ev.target.value)} />
+                  </div>
+                </div>
+                <div className="fg">
+                  <label htmlFor="ru-em">Email Address *</label>
+                  <input id="ru-em" type="email" placeholder="your@email.com"
+                    value={email} onChange={ev => setEmail(ev.target.value)} autoComplete="username" />
+                </div>
+                <PwField id="ru-pw"  label="Create Password *"  value={pw}  onChange={setPw}  meter ph="Min. 8 characters" complete="new-password" />
+                <PwField id="ru-pwc" label="Confirm Password *" value={pwc} onChange={setPwc} ph="Repeat password" complete="new-password" />
+                <button className="btn-prim" onClick={startReg} disabled={busy}>
+                  {busy && <Spin />}{busy ? "Creating Account…" : "Sign Up"}
+                </button>
+              </>
+            )}
           </>
         )}
 
+        {/* ── Step 1: OTP verification ── */}
         {step === 1 && (
           <>
             <p className="otp-hint">
@@ -693,11 +795,12 @@ function RegisterFlow({ onBack, onAuth }) {
           </>
         )}
 
+        {/* ── Step 2: Success ── */}
         {step === 2 && (
           <div className="m-ok">
             <div style={{fontSize:40,marginBottom:10}}>🎉</div>
             <strong>Account Created!</strong><br />
-            Welcome, {name}! Your account is ready.<br /><br />
+            Welcome, {firstName}! Your account is ready.<br /><br />
             <button className="btn-prim" onClick={onBack}>Sign In Now</button>
           </div>
         )}
@@ -1056,7 +1159,7 @@ function App() {
 
   function authPanel() {
     switch (screen) {
-      case "register":   return <RegisterFlow onBack={() => setScreen("signin")} onAuth={handleAuth} />;
+      case "register":   return <RegisterFlow onBack={() => setScreen("signin")} onAuth={handleAuth} onGo={setScreen} />;
       case "resetpw":    return <ResetPwFlow  onBack={() => setScreen("signin")} />;
       case "forgotuser": return <ForgotUserFlow onBack={() => setScreen("signin")} />;
       default:           return <SignInFlow onAuth={handleAuth} onGo={setScreen} />;
